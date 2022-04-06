@@ -8,7 +8,7 @@ if __name__ == "__main__":
     frame.grid()
 
     diceRoller = DiceRoller.DiceRoller(2, 6)
-    l = ttk.Label(frame)
-    ttk.Button(frame, text="Roll 2d6", command=lambda: diceRoller.rollAndDisplay(l)).grid(column=0, row=0)
+    rollText = ttk.Label(frame)
+    ttk.Button(frame, text="Roll 2d6", command=lambda: diceRoller.rollAndDisplay(rollText)).grid(column=0, row=0)
 
     root.mainloop()
