@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 import DiceRoller
+from Songs import Song, Playlist
 
 class DNDHelper(ttk.Frame):
     def __init__(self, master=None):
@@ -52,6 +53,29 @@ class DNDHelper(ttk.Frame):
 
 
 
+
+def SongsTest():
+    s = Song("song1", "artist1", "url1",)
+    s1 = Song("song2", "artist1", "url2")
+    s2 = Song("song3", "artist1", "url3")
+    s3 = Song("ambience_song4", "artist1", "url4")
+    s4 = Song("epic_song", "artist1", "url5")
+
+    m = Playlist("music")
+    m.add(s)
+    m.add(s1)
+    m.add(s2)
+
+    a = Playlist("ambience")
+    a.add(s3)
+
+    mainPlaylist = Playlist("dndGame")
+    mainPlaylist.add(m)
+    mainPlaylist.add(a)
+    mainPlaylist.add(s4)
+    mainPlaylist.print()
+
+    
 if __name__ == "__main__":
     app = DNDHelper()
     app.master.title("D&D Helper")
@@ -61,3 +85,5 @@ if __name__ == "__main__":
     ttk.Button(app.diceRollerContainer, text="Roll 2d6", command=lambda: diceRoller.rollAndDisplay(rollText)).grid(column=0, row=1)
 
     app.mainloop()
+
+    SongsTest()
