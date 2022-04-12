@@ -11,7 +11,7 @@ class DiceRoller:
 
     def displayResult(self, widget):
         widget.config(text="You rolled {}d{} and got {} = {}".format(self.num, self.sides, self.result, sum(self.result)))
-        widget.grid(column=0, row=1)
+        widget.grid(column=0, row=0)
 
     def rollAndDisplay(self, widget):
         self.roll()
