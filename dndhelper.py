@@ -25,31 +25,59 @@ class DNDHelper(ttk.Frame):
         self.rowconfigure(2, weight=1)
     
     def createWidgets(self):
+        style = ttk.Style()
+        style.configure("BW.TFrame", background='#000')
         # Create GUI elements and add them to the grid
         self.createPlaylistWidget()
         self.createMapWidget()
         self.createDiceRollerWidget()
 
     def createPlaylistWidget(self):
-        self.playlistContainer = tk.Canvas(self, bg='#000', width=400, height=600)
-        self.playlistContainer.grid(column=0, row=0, rowspan=2, padx=10, pady=10)
+        self.playlistWidgetContainer = ttk.Frame(self, width=400, height=800)
+        self.playlistWidgetContainer.grid(column=0, row=0, rowspan=3, padx=10, pady=10)
+        #self.playlistWidgetContainer.rowconfigure(0, weight=5)
+        #self.playlistWidgetContainer.rowconfigure(1, weight=1)
 
-        self.playlistButtonContainer = tk.Canvas(self, bg='#000', width=400, height=120)
-        self.playlistButtonContainer.grid(column=0, row=2, padx=10, pady=10)
-        self.addSongButton = ttk.Button(self.playlistButtonContainer, text="Add Song", command=lambda x: x+1)
-        self.swapPlaylistButton = ttk.Button(self.playlistButtonContainer, text="Swap Playlist", command=lambda x: x+1)
-        self.addSongButton.grid(column=0, row=0, sticky=tk.W)
-        self.playlistButtonContainer.grid(column=1, row=0, sticky=tk.E)
+        self.playlistContainer = ttk.Frame(self.playlistWidgetContainer, width=400, height=600, style="BW.TFrame")
+        self.playlistContainer.grid(column=0, row=0, padx=10, pady=10)
+
+        self.playlistButtonContainer = ttk.Frame(self.playlistWidgetContainer, width=400, height=120, style="BW.TFrame")
+        self.playlistButtonContainer.grid(column=0, row=1, padx=10, pady=10)
+        #self.playlistButtonContainer.columnconfigure(0, weight=1)
+        #self.playlistButtonContainer.columnconfigure(1, weight=1)
+        #self.playlistWidgetContainer.rowconfigure(0, weight=1)
+
+        self.addSongButton = ttk.Button(self.playlistButtonContainer, text="Add Song")
+        self.swapPlaylistButton = ttk.Button(self.playlistButtonContainer, text="Swap Playlist")
+        self.addSongButton.grid(column=0, row=0, sticky='w')
+        self.swapPlaylistButton.grid(column=1, row=0, sticky='e')
 
     def createMapWidget(self):
-        self.mapContainer = tk.Canvas(self, bg='#000', width=800, height=600)
-        self.mapContainer.grid(column=1, row=0, rowspan=2, padx=10, pady=10)
+        self.mapWidgetContainer = ttk.Frame(self, width=800, height=800)
+        self.mapWidgetContainer.grid(column=1, row=0, padx=10, pady=10)
+
+        self.mapContainer = ttk.Frame(self.mapWidgetContainer, width=800, height=600, style="BW.TFrame")
+        self.mapContainer.grid(column=0, row=0, padx=10, pady=10)
+
+        self.mapButtonContainer = ttk.Frame(self.mapWidgetContainer, width=800, height=120, style="BW.TFrame")
+        self.mapButtonContainer.grid(column=0, row=1, padx=10, pady=10)
+
+        self.setBackgroundButton = ttk.Button(self.mapButtonContainer, text="Set Background")
+        self.addCharacterButton = ttk.Button(self.mapButtonContainer, text="Add Character")
+        self.addAOEButton = ttk.Button(self.mapButtonContainer, text="Add Area of Effect")
+        self.setBackgroundButton.grid(column=0, row=0, sticky='w')
+        self.addCharacterButton.grid(column=1, row=0)
+        self.addAOEButton.grid(column=2, row=0, sticky='e')
 
     def createDiceRollerWidget(self):
-        self.diceRollerContainer = tk.Canvas(self, width=400, height=200)
-        self.diceRollerLogContainer = tk.Canvas(self, bg='#000', width=400, height=400)
-        self.diceRollerContainer.grid(column=2, row=0, padx=10, pady=10)
-        self.diceRollerLogContainer.grid(column=2, row=1, padx=10, pady=10)
+        self.diceRollerWidgetContainer = ttk.Frame(self, width=400, height=800)
+        self.diceRollerWidgetContainer.grid(column=2, row=0, padx=10, pady=10)
+
+        self.diceRollerContainer = ttk.Frame(self.diceRollerWidgetContainer, width=400, height=200, style="BW.TFrame")
+        self.diceRollerLogContainer = ttk.Frame(self.diceRollerWidgetContainer, width=400, height=400, style="BW.TFrame")
+
+        self.diceRollerContainer.grid(column=0, row=0, padx=10, pady=10)
+        self.diceRollerLogContainer.grid(column=0, row=1, padx=10, pady=10)
 
 
 
@@ -80,9 +108,9 @@ if __name__ == "__main__":
     app = DNDHelper()
     app.master.title("D&D Helper")
 
-    diceRoller = DiceRoller.DiceRoller(2, 6)
-    rollText = ttk.Label(app.diceRollerContainer)
-    ttk.Button(app.diceRollerContainer, text="Roll 2d6", command=lambda: diceRoller.rollAndDisplay(rollText)).grid(column=0, row=1)
+    #diceRoller = DiceRoller.DiceRoller(2, 6)
+    #rollText = ttk.Label(app.diceRollerContainer)
+    #ttk.Button(app.diceRollerContainer, text="Roll 2d6", command=lambda: diceRoller.rollAndDisplay(rollText)).grid(column=0, row=1)
 
     app.mainloop()
 
