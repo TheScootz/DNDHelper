@@ -9,10 +9,6 @@ class DiceRoller:
     def roll(self):
         self.result = random.choices(range(1, self.sides+1), k=self.num)
 
-    def displayResult(self, widget):
-        widget.config(text="You rolled {}d{} and got {} = {}".format(self.num, self.sides, self.result, sum(self.result)))
-        widget.grid(column=0, row=0)
-
-    def rollAndDisplay(self, widget):
-        self.roll()
-        self.displayResult(widget)
+    def displayResult(self, label):
+        resultString = ", ".join([str(i) for i in self.result]) + " ({})".format(sum(self.result))
+        label.config(text=resultString)

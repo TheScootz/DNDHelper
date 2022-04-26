@@ -70,16 +70,34 @@ class DNDHelper(ttk.Frame):
         self.addAOEButton.grid(column=2, row=0, sticky='e')
 
     def createDiceRollerWidget(self):
+        # Create containers
         self.diceRollerWidgetContainer = ttk.Frame(self, width=400, height=800)
-        self.diceRollerWidgetContainer.grid(column=2, row=0, padx=10, pady=10)
+        self.diceRollerWidgetContainer.grid(column=2, row=0, padx=10, pady=10, sticky=tk.N)
 
-        self.diceRollerContainer = ttk.Frame(self.diceRollerWidgetContainer, width=400, height=200, style="BW.TFrame")
+        self.diceRollerContainer = ttk.Frame(self.diceRollerWidgetContainer)
         self.diceRollerLogContainer = ttk.Frame(self.diceRollerWidgetContainer, width=400, height=400, style="BW.TFrame")
 
-        self.diceRollerContainer.grid(column=0, row=0, padx=10, pady=10)
+        self.diceRollerContainer.grid(column=0, row=0, padx=10, pady=10, sticky=tk.N)
         self.diceRollerLogContainer.grid(column=0, row=1, padx=10, pady=10)
 
 
+        # Set up Dice Roller interface
+        self.diceResult = ttk.Label(self.diceRollerContainer)
+        self.diceNum = tk.StringVar()
+        self.diceSides = tk.StringVar()
+        
+        self.diceResult.grid(column=0, row=0, columnspan=5)
+        ttk.Label(self.diceRollerContainer, text="Roll").grid(column=0, row=1)
+        ttk.Entry(self.diceRollerContainer, width=2, textvariable=self.diceNum).grid(column=1, row=1)
+        ttk.Label(self.diceRollerContainer, text="dice with").grid(column=2, row=1)
+        ttk.Entry(self.diceRollerContainer, width=3, textvariable=self.diceSides).grid(column=3, row=1)
+        ttk.Label(self.diceRollerContainer, text="sides").grid(column=4, row=1)
+        ttk.Button(self.diceRollerContainer, text="Roll", command=self.rollDice).grid(column=0, row=2, columnspan=5)
+    
+    def rollDice(self, *args):
+        self.diceRoller = DiceRoller.DiceRoller(int(self.diceNum.get()), int(self.diceSides.get()))
+        self.diceRoller.roll()
+        self.diceRoller.displayResult(self.diceResult)
 
 
 def SongsTest():
@@ -107,10 +125,6 @@ def SongsTest():
 if __name__ == "__main__":
     app = DNDHelper()
     app.master.title("D&D Helper")
-
-    #diceRoller = DiceRoller.DiceRoller(2, 6)
-    #rollText = ttk.Label(app.diceRollerContainer)
-    #ttk.Button(app.diceRollerContainer, text="Roll 2d6", command=lambda: diceRoller.rollAndDisplay(rollText)).grid(column=0, row=1)
 
     app.mainloop()
 
