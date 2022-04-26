@@ -1,66 +1,42 @@
-from abc import abstractmethod
-
-class IComponent():
-
-	@abstractmethod
-	def play(self):
-		raise NotImplementedError
-
-	@abstractmethod
-	def pause(self):
-		raise NotImplementedError
-
-	@abstractmethod
-	def stop(self):
-		raise NotImplementedError
-
-	@abstractmethod
-	def print(self):
-		raise NotImplementedError
-
 
 class Song():
 
-	def __init__(self, name, artist, url):
-		self.name = name;
-		self.url = url;
-		self.artist = artist;
-
-	def play(self):
-		print("playing")
-
-	def pause(self):
-		print("paused")
-
-	def stop(self):
-		print("stopped")
-
-	def print(self):
-		print(self.name, " by:", self.artist)
+	def __init__(self, name, artist, url, length):
+		self.name = name
+		self.url = url
+		self.artist = artist
+		self.length = length
 
 
-class Playlist(IComponent):
+class Playlist():
 
 	def __init__(self, name):
 		self.name = name
 		self.components = []
+		self.i = -1
 
 	def add(self, song):
 		self.components.append(song)
+		index =  len(self.components) - 1
+		print("added: ",index)
+		return index
 
-	def remove(self, song):
-		self.components.remove(song);
+	def remove(self, indexID):
+		del self.components[indexID];
 
 	def print(self):
 		print(self.name)
 		for i in range(len(self.components)):
 			self.components[i].print();
 
-	def play(self):
-		print("playing")
+	def nextSong(self):
+		if(len(self.components) > 0):
+			self.i += 1
+			currentSong = self.components[self.i % len(self.components)];
+			return currentSong.url
 
-	def pause(self):
-		print("paused")
-
-	def stop(self):
-		print("stopped")
+	def prevSong(self):
+		if(len(self.components) > 0):
+			self.i -= 1
+			currentSong = self.components[self.i % len(self.components)];
+			return currentSong.url
