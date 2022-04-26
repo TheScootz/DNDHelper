@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
+from tkinter import scrolledtext
 import DiceRoller
 from Songs import Song, Playlist
 
@@ -71,14 +72,14 @@ class DNDHelper(ttk.Frame):
 
     def createDiceRollerWidget(self):
         # Create containers
-        self.diceRollerWidgetContainer = ttk.Frame(self, width=400, height=800)
+        self.diceRollerWidgetContainer = ttk.Frame(self)
         self.diceRollerWidgetContainer.grid(column=2, row=0, padx=10, pady=10, sticky=tk.N)
 
         self.diceRollerContainer = ttk.Frame(self.diceRollerWidgetContainer)
-        self.diceRollerLogContainer = ttk.Frame(self.diceRollerWidgetContainer, width=400, height=400, style="BW.TFrame")
+        self.diceRollerLog = scrolledtext.ScrolledText(self.diceRollerWidgetContainer, state="disabled", width=40)
 
         self.diceRollerContainer.grid(column=0, row=0, padx=10, pady=10, sticky=tk.N)
-        self.diceRollerLogContainer.grid(column=0, row=1, padx=10, pady=10)
+        self.diceRollerLog.grid(column=0, row=1, padx=10, pady=10, sticky=tk.N+tk.S)
 
 
         # Set up Dice Roller interface
@@ -86,18 +87,32 @@ class DNDHelper(ttk.Frame):
         self.diceNum = tk.StringVar()
         self.diceSides = tk.StringVar()
         
-        self.diceResult.grid(column=0, row=0, columnspan=5)
+        self.diceResult.grid(column=0, row=0, columnspan=5, pady=10)
+
         ttk.Label(self.diceRollerContainer, text="Roll").grid(column=0, row=1)
         ttk.Entry(self.diceRollerContainer, width=2, textvariable=self.diceNum).grid(column=1, row=1)
         ttk.Label(self.diceRollerContainer, text="dice with").grid(column=2, row=1)
         ttk.Entry(self.diceRollerContainer, width=3, textvariable=self.diceSides).grid(column=3, row=1)
         ttk.Label(self.diceRollerContainer, text="sides").grid(column=4, row=1)
-        ttk.Button(self.diceRollerContainer, text="Roll", command=self.rollDice).grid(column=0, row=2, columnspan=5)
+
+        ttk.Button(self.diceRollerContainer, text="Roll", command=self.rollDice).grid(column=0, row=2, columnspan=5, pady=5)
+
+
+        # Set up Dice Roller log
+        #self.diceResults = []
+
     
     def rollDice(self, *args):
         self.diceRoller = DiceRoller.DiceRoller(int(self.diceNum.get()), int(self.diceSides.get()))
         self.diceRoller.roll()
-        self.diceRoller.displayResult(self.diceResult)
+        self.diceResult.config(text=self.diceRoller.resultString())
+        #self.diceResults.insert(0, self.diceRoller.result.copy())
+        
+        self.diceRollerLog["state"] = "normal"
+        self.diceRollerLog.insert("1.0", "{}d{}: {}\n\n".format(self.diceRoller.num, self.diceRoller.sides, self.diceRoller.resultString()))
+        self.diceRollerLog["state"] = "disabled"
+
+        
 
 
 def SongsTest():
