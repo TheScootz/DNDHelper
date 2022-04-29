@@ -2,7 +2,8 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import scrolledtext
 import DiceRoller
-from Songs import Song, Playlist
+import AudioPlayer
+
 
 class DNDHelper(ttk.Frame):
     def __init__(self, master=None):
@@ -35,18 +36,24 @@ class DNDHelper(ttk.Frame):
 
     def createPlaylistWidget(self):
 
+        self.audioPlayer = AudioPlayer.AudioPlayer()
+
         self.playlistWidgetContainer = ttk.Frame(self, width=400, height=800)
         self.playlistWidgetContainer.grid(column=0, row=0, rowspan=3, padx=10, pady=10)
 
         self.playlistControlsContainer = ttk.Frame(self.playlistWidgetContainer, width=410, height=100, style="BW.TFrame")
         self.playlistControlsContainer.grid(column=0, row=0, rowspan=3, padx=10, pady=10)
 
-        self.playButton = ttk.Button(self.playlistControlsContainer, text="Play")
-        self.forwardButton = ttk.Button(self.playlistControlsContainer, text=">")
-        self.backButton = ttk.Button(self.playlistControlsContainer, text="<")
+        self.playButton = ttk.Button(self.playlistControlsContainer, text="Play",
+            command=lambda:self.audioPlayer.play(treeWidget=self.tree, selectedItemID=currentSelection()))
+
+        self.nextButton = ttk.Button(self.playlistControlsContainer, text=">",
+            command=lambda:self.audioPlayer.play(treeWidget=self.tree, selectedItemID=self.tree.next(currentSelection())))
+        self.prevButton = ttk.Button(self.playlistControlsContainer, text="<",
+            command=lambda:self.audioPlayer.play(treeWidget=self.tree, selectedItemID=self.tree.prev(currentSelection())))
         self.playButton.grid(column=1, row=1)        
-        self.forwardButton.grid(column=2, row=1)
-        self.backButton.grid(column=0, row=1)
+        self.nextButton.grid(column=2, row=1)
+        self.prevButton.grid(column=0, row=1)
 
 
         self.tree = ttk.Treeview(self.playlistWidgetContainer, columns=("song_name", "artist_name"), show="headings", height=22)
@@ -60,14 +67,32 @@ class DNDHelper(ttk.Frame):
 
         self.playlistButtonContainer = ttk.Frame(self.playlistWidgetContainer, width=400, height=120, style="BW.TFrame")
         self.playlistButtonContainer.grid(column=0, row=6, padx=10, pady=10)
+        #tag used to differentiate playlist and songs
+        playlistTag = "pTag"
+        self.tree.tag_configure(playlistTag, background="#E8E8E8")
 
-        self.createPlaylistButton = ttk.Button(self.playlistButtonContainer, text="Create Playlist")
-        self.addSongButton = ttk.Button(self.playlistButtonContainer, text="Add Song")
-        self.deleteButton = ttk.Button(self.playlistButtonContainer, text="Delete")
+        self.createPlaylistButton = ttk.Button(self.playlistButtonContainer, text="Create Playlist", 
+            command=lambda:self.audioPlayer.createPlaylist(treeWidget=self.tree, tag=playlistTag))
+
+        self.addSongButton = ttk.Button(self.playlistButtonContainer, text="Add Song",
+            command=lambda:self.audioPlayer.addSong(treeWidget=self.tree, selectedItemID=currentSelection()))
+        #TODO an indexerror will happen if no playlist exists or is selected
+
+        self.deleteButton = ttk.Button(self.playlistButtonContainer, text="Delete",
+            command=lambda:self.audioPlayer.deleteItem(treeWidget=self.tree, selectedItemID=currentSelection()))
         self.createPlaylistButton.grid(column=0, row=0, sticky='w')
         self.addSongButton.grid(column=1, row=0)
-        self.deleteButton.grid(column=2, row=0, sticky='e')
+        self.deleteButton.grid(column=2, row=0, sticky='e')   
+        #self.after(0, self.audioPlayer.update())     
 
+        def currentSelection():
+            selection=""
+            try:
+                selection= self.tree.selection()[0]
+            except IndexError as e:
+                selection=""
+                print("nothing selected")
+            return selection
 
     def createMapWidget(self):
         self.mapWidgetContainer = ttk.Frame(self, width=800, height=800)
@@ -135,5 +160,3 @@ if __name__ == "__main__":
     app.master.title("D&D Helper")
 
     app.mainloop()
-
-    SongsTest()
