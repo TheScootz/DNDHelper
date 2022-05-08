@@ -2,8 +2,10 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import scrolledtext
 import DiceRoller
+import AudioPlayer
 import Map
 from Songs import Song, Playlist
+
 
 class DNDHelper(ttk.Frame):
     def __init__(self, master=None):
@@ -35,24 +37,62 @@ class DNDHelper(ttk.Frame):
         self.createDiceRollerWidget()
 
     def createPlaylistWidget(self):
+
+        self.audioPlayer = AudioPlayer.AudioPlayer()
+
         self.playlistWidgetContainer = ttk.Frame(self, width=400, height=800)
         self.playlistWidgetContainer.grid(column=0, row=0, rowspan=3, padx=10, pady=10)
-        #self.playlistWidgetContainer.rowconfigure(0, weight=5)
-        #self.playlistWidgetContainer.rowconfigure(1, weight=1)
 
-        self.playlistContainer = ttk.Frame(self.playlistWidgetContainer, width=400, height=600, style="BW.TFrame")
-        self.playlistContainer.grid(column=0, row=0, padx=10, pady=10)
+        self.playlistControlsContainer = ttk.Frame(self.playlistWidgetContainer, width=410, height=100, style="BW.TFrame")
+        self.playlistControlsContainer.grid(column=0, row=0, rowspan=3, padx=10, pady=10)
+
+        self.playButton = ttk.Button(self.playlistControlsContainer, text="Play",
+            command=lambda:self.audioPlayer.play(treeWidget=self.tree, selectedItemID=currentSelection()))
+
+        self.nextButton = ttk.Button(self.playlistControlsContainer, text=">",
+            command=lambda:self.audioPlayer.play(treeWidget=self.tree, selectedItemID=self.tree.next(currentSelection())))
+        self.prevButton = ttk.Button(self.playlistControlsContainer, text="<",
+            command=lambda:self.audioPlayer.play(treeWidget=self.tree, selectedItemID=self.tree.prev(currentSelection())))
+        self.playButton.grid(column=1, row=1)        
+        self.nextButton.grid(column=2, row=1)
+        self.prevButton.grid(column=0, row=1)
+
+
+        self.tree = ttk.Treeview(self.playlistWidgetContainer, columns=("song_name", "length_name"), show="headings", height=22)
+        self.tree.grid(column=0, row=3, padx=10, pady=10)   
+
+        self.tree.column("song_name")
+        self.tree.column("length_name",width=100)
+        self.tree.heading("song_name",text="Name")
+        self.tree.heading("length_name", text="Length")
+        self.tree.tag_configure("simple", background="#E8E8E8")
 
         self.playlistButtonContainer = ttk.Frame(self.playlistWidgetContainer, width=400, height=120, style="BW.TFrame")
-        self.playlistButtonContainer.grid(column=0, row=1, padx=10, pady=10)
-        #self.playlistButtonContainer.columnconfigure(0, weight=1)
-        #self.playlistButtonContainer.columnconfigure(1, weight=1)
-        #self.playlistWidgetContainer.rowconfigure(0, weight=1)
+        self.playlistButtonContainer.grid(column=0, row=6, padx=10, pady=10)
+        #tag used to differentiate playlist and songs
+        playlistTag = "pTag"
+        self.tree.tag_configure(playlistTag, background="#E8E8E8")
 
-        self.addSongButton = ttk.Button(self.playlistButtonContainer, text="Add Song")
-        self.swapPlaylistButton = ttk.Button(self.playlistButtonContainer, text="Swap Playlist")
-        self.addSongButton.grid(column=0, row=0, sticky='w')
-        self.swapPlaylistButton.grid(column=1, row=0, sticky='e')
+        self.createPlaylistButton = ttk.Button(self.playlistButtonContainer, text="Create Playlist", 
+            command=lambda:self.audioPlayer.createPlaylist(treeWidget=self.tree, tag=playlistTag))
+
+        self.addSongButton = ttk.Button(self.playlistButtonContainer, text="Add Song",
+            command=lambda:self.audioPlayer.addSong(treeWidget=self.tree, selectedItemID=currentSelection()))
+
+        self.deleteButton = ttk.Button(self.playlistButtonContainer, text="Delete",
+            command=lambda:self.audioPlayer.deleteItem(treeWidget=self.tree, selectedItemID=currentSelection()))
+        self.createPlaylistButton.grid(column=0, row=0, sticky='w')
+        self.addSongButton.grid(column=1, row=0)
+        self.deleteButton.grid(column=2, row=0, sticky='e')   
+
+        def currentSelection():
+            selection=""
+            try:
+                selection= self.tree.selection()[0]
+            except IndexError as e:
+                selection=""
+                print("nothing selected")
+            return selection
 
     def createMapWidget(self):
         self.mapWidgetContainer = ttk.Frame(self, width=800, height=800)
@@ -113,39 +153,10 @@ class DNDHelper(ttk.Frame):
         self.diceRollerLog.insert("1.0", "{}d{}: {}\n\n".format(self.diceRoller.num, self.diceRoller.sides, self.diceRoller.resultString()))
         self.diceRollerLog["state"] = "disabled"
 
-    def setBackground(self, *args):
-        bgpath = tk.filedialog.askopenfilename()
-        self.map.setBackground(self.bgpath)
-
-        
-
-
-def SongsTest():
-    s = Song("song1", "artist1", "url1",)
-    s1 = Song("song2", "artist1", "url2")
-    s2 = Song("song3", "artist1", "url3")
-    s3 = Song("ambience_song4", "artist1", "url4")
-    s4 = Song("epic_song", "artist1", "url5")
-
-    m = Playlist("music")
-    m.add(s)
-    m.add(s1)
-    m.add(s2)
-
-    a = Playlist("ambience")
-    a.add(s3)
-
-    mainPlaylist = Playlist("dndGame")
-    mainPlaylist.add(m)
-    mainPlaylist.add(a)
-    mainPlaylist.add(s4)
-    mainPlaylist.print()
-
+   
     
 if __name__ == "__main__":
     app = DNDHelper()
     app.master.title("D&D Helper")
 
     app.mainloop()
-
-    SongsTest()
