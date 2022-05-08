@@ -152,7 +152,7 @@ class DNDHelper(ttk.Frame):
         self.diceRollerLog["state"] = "disabled"
 
     def setBackground(self, *args):
-        imagepath = tk.filedialog.askopenfilename()
+        imagepath = tk.filedialog.askopenfilename(filetypes=["{Image files} {.jpg .png .gif .bmp}"])
         if imagepath != "":
             self.map.setBackground(imagepath)
 
