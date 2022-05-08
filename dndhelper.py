@@ -2,6 +2,8 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import scrolledtext
 import DiceRoller
+from Chara import Character
+from InitTracker import ITracker
 from Songs import Song, Playlist
 
 class DNDHelper(ttk.Frame):
@@ -24,7 +26,7 @@ class DNDHelper(ttk.Frame):
         self.rowconfigure(0, weight=2)
         self.rowconfigure(1, weight=3)
         self.rowconfigure(2, weight=1)
-    
+
     def createWidgets(self):
         style = ttk.Style()
         style.configure("BW.TFrame", background='#000')
@@ -86,7 +88,7 @@ class DNDHelper(ttk.Frame):
         self.diceResult = ttk.Label(self.diceRollerContainer)
         self.diceNum = tk.StringVar()
         self.diceSides = tk.StringVar()
-        
+
         self.diceResult.grid(column=0, row=0, columnspan=5, pady=10)
 
         ttk.Label(self.diceRollerContainer, text="Roll").grid(column=0, row=1)
@@ -101,18 +103,80 @@ class DNDHelper(ttk.Frame):
         # Set up Dice Roller log
         #self.diceResults = []
 
-    
+
     def rollDice(self, *args):
         self.diceRoller = DiceRoller.DiceRoller(int(self.diceNum.get()), int(self.diceSides.get()))
         self.diceRoller.roll()
         self.diceResult.config(text=self.diceRoller.resultString())
         #self.diceResults.insert(0, self.diceRoller.result.copy())
-        
+
         self.diceRollerLog["state"] = "normal"
         self.diceRollerLog.insert("1.0", "{}d{}: {}\n\n".format(self.diceRoller.num, self.diceRoller.sides, self.diceRoller.resultString()))
         self.diceRollerLog["state"] = "disabled"
 
-        
+
+def InitTest():
+
+    i = ITracker(25)
+
+    print("Populating Initiative List...\n")
+    i.addCharacter("Simeon",12)
+    i.addCharacter("Trystan",13)
+    i.addCharacter("Strahd von Zarovich",22)
+    i.addCharacter("Kanon Fodda",1)
+    i.addCharacter("Peirro Vaylow",20)
+    i.addCharacter("Tommy",13)
+    i.printInit()
+
+    print("\nRemoving plot-irrelevant character Strahd...")
+    i.removeCharacter("Strahd von Zarovich",22)
+    i.printInit()
+
+    print("\nPrinting starting initiative...\n")
+    i.startInitiative()
+    i.printInit()
+    print("\nRound 1, Turn 1:")
+    i.stepInitiative()
+    i.printInit()
+    print("\nRound 1, Turn 2:")
+    i.stepInitiative()
+    i.printInit()
+    print("\nRound 1, Turn 3:")
+    i.stepInitiative()
+    i.printInit()
+    print("\nEnding/clearing initiative list...")
+    i.endInitiative()
+
+
+def CharTest():
+
+    print("Creating two characters 'Benji' and 'Rowan'...")
+    c = Character("Benji", 21)
+    c2 = Character("Rowan", 11)
+    #c = Character("Kamaou", 300, 7000, {"STR":20,"DEX":8,"CON":18,"INT":14,"WIS":12,"CHA":10})
+
+    c.printChara()
+    c2.printChara()
+
+    print("Detailing Benji with Sanity and a 'Charmed' status...")
+    c.toggleSanity(5)
+    c.addStatus("Charmed",100)
+    c.printChara()
+
+    print("Detailing Rowan with Sanity...")
+    c2.toggleSanity(13)
+    print("Renaming 'Rowan' to 'Kamaou', and adding Ability Scores...")
+    c2.rename("Kamaou")
+    c2.modAll([20,8,18,14,12,10])
+    c2.printChara()
+
+    print("Creating new character 'Jasper' with Sanity and one ability score...")
+    c3 = Character("Jasper",46)
+    c3.toggleSanity(8)
+    c3.modScores("INT",17)
+    c3.printChara()
+
+    print("Give Benji 50XP, ")
 
 
 def SongsTest():
@@ -136,11 +200,13 @@ def SongsTest():
     mainPlaylist.add(s4)
     mainPlaylist.print()
 
-    
+
 if __name__ == "__main__":
     app = DNDHelper()
     app.master.title("D&D Helper")
 
     app.mainloop()
 
-    SongsTest()
+    #SongsTest()
+    #InitTest()
+    #CharTest()
