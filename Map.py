@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 import os
+from PIL import Image, ImageTk
 
 DEFAULT_BACKGROUND = "default.png"
 
@@ -23,7 +24,7 @@ class Map(tk.Canvas):
         self.AOE = []
 
     def setBackground(self, path):
-        self.background = tk.PhotoImage(file=path)
+        self.background = ImageTk.PhotoImage(Image.open(path))
         self.config(scrollregion=(0, 0, self.background.width(), self.background.height()))
         self.create_image(0, 0, image=self.background, anchor='nw')
 

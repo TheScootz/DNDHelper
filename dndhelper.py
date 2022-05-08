@@ -5,7 +5,6 @@ import DiceRoller
 import AudioPlayer
 import Map
 
-
 class DNDHelper(ttk.Frame):
     def __init__(self, master=None):
         ttk.Frame.__init__(self, master)
@@ -151,6 +150,12 @@ class DNDHelper(ttk.Frame):
         self.diceRollerLog["state"] = "normal"
         self.diceRollerLog.insert("1.0", "{}d{}: {}\n\n".format(self.diceRoller.num, self.diceRoller.sides, self.diceRoller.resultString()))
         self.diceRollerLog["state"] = "disabled"
+
+    def setBackground(self, *args):
+        imagepath = tk.filedialog.askopenfilename()
+        if imagepath != "":
+            self.map.setBackground(imagepath)
+
 
    
     
