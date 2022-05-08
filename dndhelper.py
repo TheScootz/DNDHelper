@@ -56,13 +56,13 @@ class DNDHelper(ttk.Frame):
         self.prevButton.grid(column=0, row=1)
 
 
-        self.tree = ttk.Treeview(self.playlistWidgetContainer, columns=("song_name", "artist_name"), show="headings", height=22)
+        self.tree = ttk.Treeview(self.playlistWidgetContainer, columns=("song_name", "length_name"), show="headings", height=22)
         self.tree.grid(column=0, row=3, padx=10, pady=10)   
 
         self.tree.column("song_name")
-        self.tree.column("artist_name",width=100)
+        self.tree.column("length_name",width=100)
         self.tree.heading("song_name",text="Name")
-        self.tree.heading("artist_name", text="Artist")
+        self.tree.heading("length_name", text="Length")
         self.tree.tag_configure("simple", background="#E8E8E8")
 
         self.playlistButtonContainer = ttk.Frame(self.playlistWidgetContainer, width=400, height=120, style="BW.TFrame")
@@ -83,7 +83,6 @@ class DNDHelper(ttk.Frame):
         self.createPlaylistButton.grid(column=0, row=0, sticky='w')
         self.addSongButton.grid(column=1, row=0)
         self.deleteButton.grid(column=2, row=0, sticky='e')   
-        #self.after(0, self.audioPlayer.update())     
 
         def currentSelection():
             selection=""
