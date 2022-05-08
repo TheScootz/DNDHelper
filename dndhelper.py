@@ -33,6 +33,8 @@ class DNDHelper(ttk.Frame):
         self.createPlaylistWidget()
         self.createMapWidget()
         self.createDiceRollerWidget()
+        self.createCharacterWidget()
+        self.createInitiativeTrackerWidget()
 
     def createPlaylistWidget(self):
 
@@ -94,7 +96,7 @@ class DNDHelper(ttk.Frame):
 
     def createMapWidget(self):
         self.mapWidgetContainer = ttk.Frame(self, width=800, height=800)
-        self.mapWidgetContainer.grid(column=1, row=0, padx=10, pady=10)
+        self.mapWidgetContainer.grid(column=1, row=0, padx=10, pady=10, rowspan=3, columnspan=2)
 
         self.map = Map.Map(self.mapWidgetContainer, width=800, height=600)
         self.map.grid(column=0, row=0, padx=10, pady=10, sticky=(tk.N, tk.W, tk.E, tk.S))
@@ -112,10 +114,10 @@ class DNDHelper(ttk.Frame):
     def createDiceRollerWidget(self):
         # Create containers
         self.diceRollerWidgetContainer = ttk.Frame(self)
-        self.diceRollerWidgetContainer.grid(column=2, row=0, padx=10, pady=10, sticky=tk.N)
+        self.diceRollerWidgetContainer.grid(column=3, row=0, padx=10, pady=10, sticky=tk.N)
 
         self.diceRollerContainer = ttk.Frame(self.diceRollerWidgetContainer)
-        self.diceRollerLog = scrolledtext.ScrolledText(self.diceRollerWidgetContainer, state="disabled", width=40)
+        self.diceRollerLog = scrolledtext.ScrolledText(self.diceRollerWidgetContainer, state="disabled", width=40, height=10)
 
         self.diceRollerContainer.grid(column=0, row=0, padx=10, pady=10, sticky=tk.N)
         self.diceRollerLog.grid(column=0, row=1, padx=10, pady=10, sticky=tk.N+tk.S)
@@ -139,6 +141,16 @@ class DNDHelper(ttk.Frame):
 
         # Set up Dice Roller log
         #self.diceResults = []
+
+
+    def createCharacterWidget(self):
+        self.characterWidgetContainer = ttk.Frame(self, width=350, height=200, style="BW.TFrame")
+        self.characterWidgetContainer.grid(column=3, row=1, padx=10, pady=10)
+
+
+    def createInitiativeTrackerWidget(self):
+        self.initiativeTracker = ttk.Frame(self, width=350, height=200, style="BW.TFrame")
+        self.initiativeTracker.grid(column=3, row=2, padx=10, pady=10)
 
     
     def rollDice(self, *args):
