@@ -12,9 +12,7 @@ class AudioPlayer:
 		pygame.init()
 		pygame.mixer.init()
 		self.playlistCount=0
-		self.END_SONG_EVENT=pygame.USEREVENT+1
-		pygame.mixer.music.set_endevent(self.END_SONG_EVENT) 
-
+		self.playlistSongs=None
 
 	def play(self, treeWidget, selectedItemID):
 		self.isPaused = not self.isPaused
@@ -22,6 +20,7 @@ class AudioPlayer:
 			pygame.mixer.music.pause()
 		else:
 			pygame.mixer.music.unpause()
+		self.tmpWidget=treeWidget 	#TODO Fix this
 
 		if(selectedItemID != ""):
 			selectedItemName = treeWidget.item(selectedItemID)["values"][0]
@@ -29,33 +28,33 @@ class AudioPlayer:
 				# selected playlist
 				children=treeWidget.get_children(selectedItemID)
 				if(len(children) > 0):
-					songs=[]
+					self.playlistSongs=[]
 					for child in children:
-						songs.append(treeWidget.item(child)["values"][2])
-					self.playPlaylist(songsPaths=songs)
+						self.playlistSongs.append(treeWidget.item(child)["values"][2])
+					self.playPlaylist()
 			else:
 				#selected single song that will loop
 				self.playSong(path=treeWidget.item(selectedItemID)["values"][2], loops=-1)
 
-
 	def playSong(self, path, loops=0):
-		#print(path)
 		pygame.mixer.music.load(path)
 		pygame.mixer.music.play(loops=loops)
 
 
-	def playPlaylist(self, songsPaths):
-		self.playSong(songsPaths[0])
-		#pygame.mixer.music.queue(songsPaths[1])
+	def playPlaylist(self):
+		if(len(self.playlistSongs) > 0):
+			self.playSong(self.playlistSongs.pop(0))
+			self.updatePlaylist()
 
 
-	#def update(self):
-		#print("update")
-		# for event in pygame.event.get():
-		# 	if(event.type == self.END_SONG_EVENT):
-		# 		playlistChildren=(self.currentSongIndex + 1) % len(self.currentPlaylist)
-		# 		playSong();
-		
+	def updatePlaylist(self):
+		currentTime=pygame.mixer.music.get_pos()/1000
+		#print(currentTime)
+		if(currentTime < 0):
+			self.playPlaylist()
+			return
+		self.tmpWidget.after(1000, self.updatePlaylist)
+
 
 	def createPlaylist(self, treeWidget, tag):
 		self.playlistCount+=1
