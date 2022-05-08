@@ -11,6 +11,7 @@ class AudioPlayer:
 		self.fileTypes=(("audio files","*.mp3 *.wav"),("all files","*.*"))
 		pygame.init()
 		pygame.mixer.init()
+		self.playlistCount=0
 		self.END_SONG_EVENT=pygame.USEREVENT+1
 		pygame.mixer.music.set_endevent(self.END_SONG_EVENT) 
 
@@ -24,7 +25,7 @@ class AudioPlayer:
 
 		if(selectedItemID != ""):
 			selectedItemName = treeWidget.item(selectedItemID)["values"][0]
-			if(selectedItemName == "playlist"):
+			if("playlist" in selectedItemName):
 				# selected playlist
 				children=treeWidget.get_children(selectedItemID)
 				if(len(children) > 0):
@@ -48,7 +49,7 @@ class AudioPlayer:
 		#pygame.mixer.music.queue(songsPaths[1])
 
 
-	def update(self):
+	#def update(self):
 		#print("update")
 		# for event in pygame.event.get():
 		# 	if(event.type == self.END_SONG_EVENT):
@@ -57,19 +58,23 @@ class AudioPlayer:
 		
 
 	def createPlaylist(self, treeWidget, tag):
-		treeWidget.insert("", "end", values=("playlist",""), open=False, tags=tag)
+		self.playlistCount+=1
+		treeWidget.insert("", "end", values=("playlist"+str(self.playlistCount),""), open=False, tags=tag)
 
 
 	def addSong(self, treeWidget, selectedItemID):
-		path = self.openFile()
-		length = ""
-		try:
-			length = datetime.timedelta(seconds=MP3(path).info.length)
-		except Exception as e:
-			length ="N/A"
+		if (selectedItemID != ""):
+			selectedItemName = treeWidget.item(selectedItemID)["values"][0]
+			if ("playlist" in selectedItemName):
+				path = self.openFile()
+				length = ""
+				try:
+					length = datetime.timedelta(seconds=MP3(path).info.length)
+				except Exception as e:
+					length ="N/A"
 
-		tempSong = Song(name=os.path.basename(path), length=length, url=path)
-		treeWidget.insert(selectedItemID, "end", values=(tempSong.name, tempSong.length, tempSong.url))
+				tempSong = Song(name=os.path.basename(path), length=length, url=path)
+				treeWidget.insert(selectedItemID, "end", values=(tempSong.name, tempSong.length, tempSong.url))
 
 
 	def deleteItem(self, treeWidget, selectedItemID):

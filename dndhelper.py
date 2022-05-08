@@ -76,7 +76,6 @@ class DNDHelper(ttk.Frame):
 
         self.addSongButton = ttk.Button(self.playlistButtonContainer, text="Add Song",
             command=lambda:self.audioPlayer.addSong(treeWidget=self.tree, selectedItemID=currentSelection()))
-        #TODO an indexerror will happen if no playlist exists or is selected
 
         self.deleteButton = ttk.Button(self.playlistButtonContainer, text="Delete",
             command=lambda:self.audioPlayer.deleteItem(treeWidget=self.tree, selectedItemID=currentSelection()))
