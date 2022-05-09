@@ -6,8 +6,6 @@ from PIL import Image, ImageTk
 
 DEFAULT_BACKGROUND = "default.png"
 COLORS = ["red", "cyan", "blue", "purple", "magenta", "orange", "maroon", "green"]
-TOKEN_STIPPLE = "gray75"
-AOE_STIPPLE = "gray25"
 
 CIRCLE = 0
 RECTANGLE = 1
@@ -26,7 +24,7 @@ class Map(tk.Canvas):
         self.setBackground(DEFAULT_BACKGROUND)
         self.tokens = []
         self.aoe = []
-        self.colors = COLORS
+        self.colors = COLORS.copy()
         random.shuffle(self.colors)
 
         self.testTokens()
@@ -52,7 +50,7 @@ class Map(tk.Canvas):
 
         pos_tl = [x-token.radius for x in token.position]
         pos_br = [x+token.radius for x in token.position]
-        token.id = self.create_oval(*pos_tl, *pos_br, fill=token.color, width=5, stipple=TOKEN_STIPPLE, tag="token")
+        token.id = self.create_oval(*pos_tl, *pos_br, fill=token.color, width=5, tag="token")
         try:
             self.tag_raise(token.id, "aoe")
         # No AOEs exist
@@ -76,11 +74,11 @@ class Map(tk.Canvas):
         if aoe.shape == CIRCLE:
             pos_tl = [x-aoe.size for x in aoe.position]
             pos_br = [x+aoe.size for x in aoe.position]
-            aoe.id = self.create_oval(*pos_tl, *pos_br, fill=aoe.color, stipple=AOE_STIPPLE, tag="aoe")
+            aoe.id = self.create_oval(*pos_tl, *pos_br, fill=aoe.color, tag="aoe")
         elif aoe.shape == RECTANGLE:
             pos_tl = aoe.position
             pos_br = (aoe.position[0]+aoe.size[0], aoe.position[1]+aoe.size[1])
-            aoe.id = self.create_rectangle(*pos_tl, *pos_br, fill=aoe.color, stipple=AOE_STIPPLE, tag="aoe")
+            aoe.id = self.create_rectangle(*pos_tl, *pos_br, fill=aoe.color, tag="aoe")
         try:
             self.tag_lower(aoe.id, "token")
         # No tokens exist
@@ -101,7 +99,7 @@ class Map(tk.Canvas):
             return self.colors.pop(0)
         # If we're out of colors, refresh them
         except IndexError:
-            self.colors = COLORS
+            self.colors = COLORS.copy()
             random.shuffle(self.colors)
             return self.colors.pop(0)
 

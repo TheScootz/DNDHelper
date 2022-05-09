@@ -106,7 +106,7 @@ class DNDHelper(ttk.Frame):
 
         self.setBackgroundButton = ttk.Button(self.mapButtonContainer, text="Set Background", command=self.setBackground)
         self.addCharacterButton = ttk.Button(self.mapButtonContainer, text="Add Character")
-        self.addAOEButton = ttk.Button(self.mapButtonContainer, text="Add Area of Effect")
+        self.addAOEButton = ttk.Button(self.mapButtonContainer, text="Add Area of Effect", command=self.promptAOE)
         self.setBackgroundButton.grid(column=0, row=0, sticky=tk.W)
         self.addCharacterButton.grid(column=1, row=0)
         self.addAOEButton.grid(column=2, row=0, sticky=tk.E)
@@ -167,6 +167,13 @@ class DNDHelper(ttk.Frame):
         imagepath = tk.filedialog.askopenfilename(filetypes=["{Image files} {.jpg .png .gif .bmp}"])
         if imagepath != "":
             self.map.setBackground(imagepath)
+
+    def promptAOE(self, *args):
+        self.map.bind("<1>", self.addAOE)
+
+    def addAOE(self, event):
+        aoe = Map.AOE(Map.RECTANGLE, (50, 100), (event.x, event.y))
+        self.map.addAOE(aoe)
 
 
    
