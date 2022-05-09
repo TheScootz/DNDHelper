@@ -26,6 +26,7 @@ class Map(tk.Canvas):
         self.tokens = []
         self.aoe = []
         self.colors = COLORS.copy()
+        self.scale = 10 # Scale of the map represents pixels per foot
         random.shuffle(self.colors)
 
         # Listen for mouse down to start drag-scroll 
@@ -39,8 +40,8 @@ class Map(tk.Canvas):
         self.addToken(Token(30, 0, (67,324)))
         #self.removeToken(self.tokens[0])
 
-        self.addAOE(AOE(CIRCLE, 200, (300,300)))
-        self.addAOE(AOE(RECTANGLE, (100,200), (500,10)))
+        self.addAOE(AOE(CIRCLE, 20, (300,300)))
+        self.addAOE(AOE(RECTANGLE, (10,20), (500,10)))
 
     def setBackground(self, path):
         self.bgpath = path
@@ -54,8 +55,8 @@ class Map(tk.Canvas):
         self.tokens.append(token)
         token.color = self.getColor()
 
-        pos_tl = [x-token.radius for x in token.position]
-        pos_br = [x+token.radius for x in token.position]
+        pos_tl = [x-(token.radius*self.scale) for x in token.position]
+        pos_br = [x+(token.radius*self.scale) for x in token.position]
         token.id = self.create_oval(*pos_tl, *pos_br, fill=token.color, width=5, tag="token")
         try:
             self.tag_raise(token.id, "aoe")
@@ -78,12 +79,12 @@ class Map(tk.Canvas):
         aoe.color = self.getColor()
         
         if aoe.shape == CIRCLE:
-            pos_tl = [x-aoe.size for x in aoe.position]
-            pos_br = [x+aoe.size for x in aoe.position]
+            pos_tl = [x-(aoe.size*self.scale) for x in aoe.position]
+            pos_br = [x+(aoe.size*self.scale) for x in aoe.position]
             aoe.id = self.create_oval(*pos_tl, *pos_br, fill=aoe.color, tag="aoe")
         elif aoe.shape == RECTANGLE:
             pos_tl = aoe.position
-            pos_br = (aoe.position[0]+aoe.size[0], aoe.position[1]+aoe.size[1])
+            pos_br = (aoe.position[0]+(aoe.size[0]*self.scale), aoe.position[1]+(aoe.size[1]*self.scale))
             aoe.id = self.create_rectangle(*pos_tl, *pos_br, fill=aoe.color, tag="aoe")
         try:
             self.tag_lower(aoe.id, "token")
@@ -125,10 +126,12 @@ class Map(tk.Canvas):
         
 
 class SetScaleDialog(tk.Toplevel):
-    def __init__(self, master, mapbg, **kwargs):
+    def __init__(self, master, mapCanvas, **kwargs):
         super().__init__(master, kwargs)
 
-        self.setupCanvas(mapbg)
+        self.map = mapCanvas
+        self.scale = self.map.scale
+        self.setupCanvas(self.map.bgpath)
 
         # This section (incl. comments) is taken from the TkDocs tutorial
         self.protocol("WM_DELETE_WINDOW", self.dismiss) # intercept close button
@@ -137,34 +140,60 @@ class SetScaleDialog(tk.Toplevel):
         self.grab_set()        # ensure all input goes to our window
         self.wait_window()     # block until window is destroyed
 
-
     def setupCanvas(self, bgpath):
-        bg = Image.open(bgpath)
+        self.bg = Image.open(bgpath)
+        self.ratio = (1, 1) # How much the width and height have been scaled from the original
         # Shrink the image if it's bigger than 1024 x 768
-        if bg.width > 1024 or bg.height > 768:
-            aspectratio = bg.width / bg.height
+        if not (self.bg.width > 1024 or self.bg.height > 768):
+            aspectratio = self.bg.width / self.bg.height
             # Figure out which dimension needs more shrinking
-            w_over = max(bg.width - 1024, 0)
-            h_over = max(bg.height - 768, 0)
+            w_over = max(self.bg.width - 1024, 0)
+            h_over = max(self.bg.height - 768, 0)
 
             if (w_over > h_over):
-                w_new = bg.width - w_over
-                h_new = bg.height - (w_over / aspectratio)
+                w_new = self.bg.width - w_over
+                h_new = self.bg.height - (w_over / aspectratio)
             else:
-                w_new = bg.width - (h_over * aspectratio)
-                h_new = bg.height - h_over
+                w_new = self.bg.width - (h_over * aspectratio)
+                h_new = self.bg.height - h_over
 
-            bg = bg.resize((int(w_new), int(h_new)))
+            self.ratio = (self.bg.width / w_new, self.bg.height / h_new)
+            self.bg = self.bg.resize(size=(int(w_new), int(h_new)))
 
-        bg = ImageTk.PhotoImage(image=bg)
-        self.canvas = tk.Canvas(self, width=bg.width(), height=bg.height())
-        self.canvas.create_image(0, 0, image=bg, anchor='nw')
+        self.bg = ImageTk.PhotoImage(self.bg)
+        self.canvas = tk.Canvas(self, width=800, height=600, scrollregion=(0, 0, self.bg.width(), self.bg.height()))
         self.canvas.grid(column=0, row=0)
+        self.canvas.create_image(0, 0, image=self.bg, anchor='nw')
+        self.createGrid(self.scale)
+
+        ttk.Label(self, text="Drag so that the grid squares cover 5 square feet").grid(column=0, row=1)
+        ttk.Scale(self, orient=tk.HORIZONTAL, from_=10, to=100, value=self.scale, command=self.createGrid).grid(column=0, row=2, sticky=(tk.W, tk.E))
+        ttk.Button(self, text="OK", command=self.dismiss).grid(column=0, row=3)
+
+    # Code comes from https://stackoverflow.com/questions/34006302/how-to-create-a-grid-on-tkinter-in-python
+    def createGrid(self, scale):
+        self.scale = round(float(scale))
+        w = self.canvas.winfo_width() # Get current width of canvas
+        h = self.canvas.winfo_height() # Get current height of canvas
+        self.canvas.delete('grid_line') # Will only remove the grid_line
+
+        spacing = int(self.scale * 5)
+
+        # Creates all vertical lines at intevals of spacing
+        for i in range(0, w, spacing):
+            self.canvas.create_line([(i, 0), (i, h)], tag='grid_line')
+
+        # Creates all horizontal lines at intevals of spacing
+        for i in range(0, h, spacing):
+            self.canvas.create_line([(0, i), (w, i)], tag='grid_line')
 
     # Also from TkDocs
     def dismiss(self):
+        self.map.scale = self.scale
         self.grab_release()
         self.destroy()
+
+
 
 class MapWidget(ttk.Frame):
     def __init__(self, master, **kwargs):
@@ -193,12 +222,12 @@ class MapWidget(ttk.Frame):
         self.addAOEBind = self.map.bind("<ButtonRelease-1>", self.addAOE, add="+")
 
     def addAOE(self, event):
-        aoe = AOE(RECTANGLE, (50, 100), self.convertPos((event.x, event.y)))
+        aoe = AOE(RECTANGLE, (5, 10), self.convertPos((event.x, event.y)))
         self.map.addAOE(aoe)
         self.map.unbind("<ButtonRelease-1>", self.addAOEBind)
 
     def setScale(self, *args):
-        dialog = Map.SetScaleDialog(self, self.map.bgpath)
+        dialog = SetScaleDialog(self, self.map)
 
     def convertPos(self, pos):
         x = self.map.canvasx(pos[0])
