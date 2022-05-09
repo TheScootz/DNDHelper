@@ -15,7 +15,7 @@ class Map(tk.Canvas):
         # Create canvas and its scrollbars
         self.scrollH = ttk.Scrollbar(parent, orient=tk.HORIZONTAL)
         self.scrollV = ttk.Scrollbar(parent, orient=tk.VERTICAL)
-        super().__init__(parent, kwargs, xscrollcommand=self.scrollH.set, yscrollcommand=self.scrollV.set)
+        super().__init__(parent, xscrollcommand=self.scrollH.set, yscrollcommand=self.scrollV.set, **kwargs)
         self.scrollH["command"] = self.xview
         self.scrollV["command"] = self.yview
         self.scrollH.grid(column=0, row=1, sticky=(tk.W, tk.E))
@@ -145,7 +145,39 @@ class SetScaleDialog(tk.Toplevel):
     def dismiss(self):
         self.grab_release()
         self.destroy()
-        
+
+class MapWidget(ttk.Frame):
+    def __init__(self, master, **kwargs):
+        super().__init__(master, **kwargs)
+
+        self.map = Map(self, width=800, height=600)
+        self.map.grid(column=0, row=0, padx=10, pady=10, sticky=(tk.N, tk.W, tk.E, tk.S))
+
+        self.mapButtonContainer = ttk.Frame(self, width=800, height=120, style="BW.TFrame")
+        self.mapButtonContainer.grid(column=0, row=2, padx=10, pady=10, sticky=tk.S)
+
+        self.setBackgroundButton = ttk.Button(self.mapButtonContainer, text="Set Background", command=self.setBackground)
+        self.addCharacterButton = ttk.Button(self.mapButtonContainer, text="Add Character")
+        self.addAOEButton = ttk.Button(self.mapButtonContainer, text="Add Area of Effect", command=self.promptAOE)
+        self.setBackgroundButton.grid(column=0, row=0, sticky=tk.W)
+        self.addCharacterButton.grid(column=1, row=0)
+        self.addAOEButton.grid(column=2, row=0, sticky=tk.E)
+        ttk.Button(self.mapButtonContainer, text="Set Scale", command=self.setScale).grid(column=3, row=0)
+
+    def setBackground(self, *args):
+        imagepath = tk.filedialog.askopenfilename(filetypes=["{Image files} {.jpg .png .gif .bmp}"])
+        if imagepath != "":
+            self.map.setBackground(imagepath)
+
+    def promptAOE(self, *args):
+        self.map.bind("<1>", self.addAOE)
+
+    def addAOE(self, event):
+        aoe = Map.AOE(Map.RECTANGLE, (50, 100), (event.x, event.y))
+        self.map.addAOE(aoe)
+
+    def setScale(self, *args):
+        dialog = Map.SetScaleDialog(self, self.map.bgpath)
 
 class Token:
     def __init__(self, radius, height, position, color="white", oid=0):

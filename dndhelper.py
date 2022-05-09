@@ -30,7 +30,8 @@ class DNDHelper(ttk.Frame):
         style.configure("BW.TFrame", background='#000')
         # Create GUI elements and add them to the grid
         self.createPlaylistWidget()
-        self.createMapWidget()
+        self.mapWidget = Map.MapWidget(self, width=800, height=800)
+        self.mapWidget.grid(column=1, row=0, padx=10, pady=10, rowspan=3, columnspan=2)
 
         self.diceRollerWidget = DiceRoller.DiceRollerWidget(self)
         self.diceRollerWidget.grid(column=3, row=0, padx=10, pady=10, sticky=tk.N)
@@ -95,43 +96,7 @@ class DNDHelper(ttk.Frame):
                 selection=""
                 print("nothing selected")
             return selection
-
-    def createMapWidget(self):
-        self.mapWidgetContainer = ttk.Frame(self, width=800, height=800)
-        self.mapWidgetContainer.grid(column=1, row=0, padx=10, pady=10, rowspan=3, columnspan=2)
-
-        self.map = Map.Map(self.mapWidgetContainer, width=800, height=600)
-        self.map.grid(column=0, row=0, padx=10, pady=10, sticky=(tk.N, tk.W, tk.E, tk.S))
-
-        self.mapButtonContainer = ttk.Frame(self.mapWidgetContainer, width=800, height=120, style="BW.TFrame")
-        self.mapButtonContainer.grid(column=0, row=2, padx=10, pady=10, sticky=tk.S)
-
-        self.setBackgroundButton = ttk.Button(self.mapButtonContainer, text="Set Background", command=self.setBackground)
-        self.addCharacterButton = ttk.Button(self.mapButtonContainer, text="Add Character")
-        self.addAOEButton = ttk.Button(self.mapButtonContainer, text="Add Area of Effect", command=self.promptAOE)
-        self.setBackgroundButton.grid(column=0, row=0, sticky=tk.W)
-        self.addCharacterButton.grid(column=1, row=0)
-        self.addAOEButton.grid(column=2, row=0, sticky=tk.E)
-        ttk.Button(self.mapButtonContainer, text="Set Scale", command=self.setScale).grid(column=3, row=0)
-
-    def setBackground(self, *args):
-        imagepath = tk.filedialog.askopenfilename(filetypes=["{Image files} {.jpg .png .gif .bmp}"])
-        if imagepath != "":
-            self.map.setBackground(imagepath)
-
-    def promptAOE(self, *args):
-        self.map.bind("<1>", self.addAOE)
-
-    def addAOE(self, event):
-        aoe = Map.AOE(Map.RECTANGLE, (50, 100), (event.x, event.y))
-        self.map.addAOE(aoe)
-
-    def setScale(self, *args):
-        dialog = Map.SetScaleDialog(self, self.map.bgpath)
-
         
-
-
     def createCharacterWidget(self):
         self.characterWidgetContainer = ttk.Frame(self, width=350, height=200, style="BW.TFrame")
         self.characterWidgetContainer.grid(column=3, row=1, padx=10, pady=10)

@@ -18,7 +18,7 @@ class DiceRoller:
 
 class DiceRollerWidget(ttk.Frame):
     def __init__(self, master, **kwargs):
-        super().__init__(master)
+        super().__init__(master, **kwargs)
 
         self.diceRollerContainer = ttk.Frame(self)
         self.diceRollerLog = scrolledtext.ScrolledText(self, state="disabled", width=40, height=10)
