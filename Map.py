@@ -38,7 +38,8 @@ class Map(tk.Canvas):
         self.addAOE(AOE(RECTANGLE, (100,200), (500,10)))
 
     def setBackground(self, path):
-        self.background = ImageTk.PhotoImage(Image.open(path))
+        self.bgpath = path
+        self.background = ImageTk.PhotoImage(file=path)
         # Set the canvas size to the size of the image
         self.config(scrollregion=(0, 0, self.background.width(), self.background.height()))
         self.create_image(0, 0, image=self.background, anchor='nw')
@@ -102,6 +103,49 @@ class Map(tk.Canvas):
             self.colors = COLORS.copy()
             random.shuffle(self.colors)
             return self.colors.pop(0)
+
+class SetScaleDialog(tk.Toplevel):
+    def __init__(self, master, mapbg, **kwargs):
+        super().__init__(master, kwargs)
+
+        self.setupCanvas(mapbg)
+
+        # This section (incl. comments) is taken from the TkDocs tutorial
+        self.protocol("WM_DELETE_WINDOW", self.dismiss) # intercept close button
+        self.transient(master)   # dialog window is related to main
+        self.wait_visibility() # can't grab until window appears, so we wait
+        self.grab_set()        # ensure all input goes to our window
+        self.wait_window()     # block until window is destroyed
+
+
+    def setupCanvas(self, bgpath):
+        bg = Image.open(bgpath)
+        # Shrink the image if it's bigger than 1024 x 768
+        if bg.width > 1024 or bg.height > 768:
+            aspectratio = bg.width / bg.height
+            # Figure out which dimension needs more shrinking
+            w_over = max(bg.width - 1024, 0)
+            h_over = max(bg.height - 768, 0)
+
+            if (w_over > h_over):
+                w_new = bg.width - w_over
+                h_new = bg.height - (w_over / aspectratio)
+            else:
+                w_new = bg.width - (h_over * aspectratio)
+                h_new = bg.height - h_over
+
+            bg = bg.resize((int(w_new), int(h_new)))
+
+        bg = ImageTk.PhotoImage(image=bg)
+        self.canvas = tk.Canvas(self, width=bg.width(), height=bg.height())
+        self.canvas.create_image(0, 0, image=bg, anchor='nw')
+        self.canvas.grid(column=0, row=0)
+
+    # Also from TkDocs
+    def dismiss(self):
+        self.grab_release()
+        self.destroy()
+        
 
 class Token:
     def __init__(self, radius, height, position, color="white", oid=0):
