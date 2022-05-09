@@ -50,9 +50,9 @@ class DNDHelper(ttk.Frame):
             command=lambda:self.audioPlayer.play(treeWidget=self.tree, selectedItemID=currentSelection()))
 
         self.nextButton = ttk.Button(self.playlistControlsContainer, text=">",
-            command=lambda:self.audioPlayer.play(treeWidget=self.tree, selectedItemID=self.tree.next(currentSelection())))
+            command=lambda:self.audioPlayer.playNextSong(treeWidget=self.tree, nextSelection=self.tree.next(currentSelection())))
         self.prevButton = ttk.Button(self.playlistControlsContainer, text="<",
-            command=lambda:self.audioPlayer.play(treeWidget=self.tree, selectedItemID=self.tree.prev(currentSelection())))
+            command=lambda:self.audioPlayer.playPrevSong(treeWidget=self.tree, prevSelection=self.tree.prev(currentSelection())))
         self.playButton.grid(column=1, row=1)        
         self.nextButton.grid(column=2, row=1)
         self.prevButton.grid(column=0, row=1)
@@ -65,7 +65,6 @@ class DNDHelper(ttk.Frame):
         self.tree.column("length_name",width=100)
         self.tree.heading("song_name",text="Name")
         self.tree.heading("length_name", text="Length")
-        self.tree.tag_configure("simple", background="#E8E8E8")
 
         self.playlistButtonContainer = ttk.Frame(self.playlistWidgetContainer, width=400, height=120, style="BW.TFrame")
         self.playlistButtonContainer.grid(column=0, row=6, padx=10, pady=10)
