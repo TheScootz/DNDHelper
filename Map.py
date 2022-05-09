@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
+import math
 import os
 import random
 from PIL import Image, ImageTk
@@ -11,11 +12,11 @@ CIRCLE = 0
 RECTANGLE = 1
 
 class Map(tk.Canvas):
-    def __init__(self, parent, **kwargs):
+    def __init__(self, master, **kwargs):
         # Create canvas and its scrollbars
-        self.scrollH = ttk.Scrollbar(parent, orient=tk.HORIZONTAL)
-        self.scrollV = ttk.Scrollbar(parent, orient=tk.VERTICAL)
-        super().__init__(parent, xscrollcommand=self.scrollH.set, yscrollcommand=self.scrollV.set, **kwargs)
+        self.scrollH = ttk.Scrollbar(master, orient=tk.HORIZONTAL)
+        self.scrollV = ttk.Scrollbar(master, orient=tk.VERTICAL)
+        super().__init__(master, xscrollcommand=self.scrollH.set, yscrollcommand=self.scrollV.set, **kwargs)
         self.scrollH["command"] = self.xview
         self.scrollV["command"] = self.yview
         self.scrollH.grid(column=0, row=1, sticky=(tk.W, tk.E))
@@ -26,6 +27,10 @@ class Map(tk.Canvas):
         self.aoe = []
         self.colors = COLORS.copy()
         random.shuffle(self.colors)
+
+        # Listen for mouse down to start drag-scroll 
+        self.bind("<Button-1>", self.logPos)
+        self.bind("<B1-Motion>", self.dragScroll)
 
         self.testTokens()
 
@@ -104,6 +109,21 @@ class Map(tk.Canvas):
             random.shuffle(self.colors)
             return self.colors.pop(0)
 
+    def logPos(self, event):
+        self.lastPos = (event.x, event.y)
+
+    def dragScroll(self, event):
+        # We want to move opposite the mouse direction so we do old - new
+        x_diff = self.lastPos[0] - event.x
+        y_diff = self.lastPos[1] - event.y
+
+        self.xview(tk.SCROLL, x_diff, tk.UNITS)
+        self.yview(tk.SCROLL, y_diff, tk.UNITS)
+
+        self.lastPos = (event.x, event.y)
+
+        
+
 class SetScaleDialog(tk.Toplevel):
     def __init__(self, master, mapbg, **kwargs):
         super().__init__(master, kwargs)
@@ -170,14 +190,20 @@ class MapWidget(ttk.Frame):
             self.map.setBackground(imagepath)
 
     def promptAOE(self, *args):
-        self.map.bind("<1>", self.addAOE)
+        self.addAOEBind = self.map.bind("<ButtonRelease-1>", self.addAOE, add="+")
 
     def addAOE(self, event):
-        aoe = Map.AOE(Map.RECTANGLE, (50, 100), (event.x, event.y))
+        aoe = AOE(RECTANGLE, (50, 100), self.convertPos((event.x, event.y)))
         self.map.addAOE(aoe)
+        self.map.unbind("<ButtonRelease-1>", self.addAOEBind)
 
     def setScale(self, *args):
         dialog = Map.SetScaleDialog(self, self.map.bgpath)
+
+    def convertPos(self, pos):
+        x = self.map.canvasx(pos[0])
+        y = self.map.canvasy(pos[1])
+        return (x, y)
 
 class Token:
     def __init__(self, radius, height, position, color="white", oid=0):
