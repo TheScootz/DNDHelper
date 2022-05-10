@@ -7,6 +7,7 @@ from PIL import Image, ImageTk
 
 DEFAULT_BACKGROUND = "default.png"
 COLORS = ["red", "cyan", "blue", "purple", "magenta", "orange", "maroon", "green"]
+DRAG_SENSITIVITY = 1
 
 CIRCLE = 0
 RECTANGLE = 1
@@ -129,8 +130,8 @@ class Map(tk.Canvas):
 
     def dragScroll(self, event):
         # We want to move opposite the mouse direction so we do old - new
-        x_diff = self.lastPos[0] - event.x
-        y_diff = self.lastPos[1] - event.y
+        x_diff = round((self.lastPos[0] - event.x) * DRAG_SENSITIVITY)
+        y_diff = round((self.lastPos[1] - event.y) * DRAG_SENSITIVITY)
 
         self.xview(tk.SCROLL, x_diff, tk.UNITS)
         self.yview(tk.SCROLL, y_diff, tk.UNITS)
