@@ -38,7 +38,7 @@ class Map(tk.Canvas):
         self.bind("<B1-Motion>", self.moveElement)
         self.tag_bind("background", "<Button-1>", lambda e: self.setActiveElement(None))
 
-        self.testElements()
+        #self.testElements()
 
     def testElements(self):
         self.addToken(Token(2, 0, (250,350)))
