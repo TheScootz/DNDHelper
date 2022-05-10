@@ -33,11 +33,14 @@ class Map(tk.Canvas):
         # Listen for mouse down to start drag-scroll 
         self.bind("<Button-1>", self.logPos)
         self.tag_bind("background", "<B1-Motion>", self.dragScroll)
+        # Listen for element move and delete events
         self.bind("<B1-Motion>", self.moveElement)
+        self.tag_bind("background", "<Button-1>", lambda e: self.setActiveElement(None))
+        self.bind("<Button-3>", lambda e: self.removeElement(self.activeElement))
 
-        self.testTokens()
+        self.testElements()
 
-    def testTokens(self):
+    def testElements(self):
         self.addToken(Token(5, 0, (250,350)))
         self.addToken(Token(3, 0, (67,324)))
         #self.removeToken(self.tokens[0])
@@ -64,23 +67,12 @@ class Map(tk.Canvas):
 
         # Listen for drag movement
         self.tag_bind(token.id, "<Button-1>", lambda e: self.setActiveElement(token))
-        self.tag_bind(token.id, "<Leave>", lambda e: self.setActiveElement(None))
         
         # Move tokens in front of AOEs
         try:
             self.tag_raise(token.id, "aoe")
         # No AOEs exist
         except tk.TclError: pass
-
-    def removeToken(self, token):
-        try:
-            self.tokens.remove(token)
-        except ValueError:
-            print("Token does not exist in the map.")
-            return
-            
-        self.colors.append(token.color)
-        self.delete(token.id)
 
     def addAOE(self, aoe):
         if aoe not in self.aoe:
@@ -99,7 +91,6 @@ class Map(tk.Canvas):
 
         # Listen for drag movement
         self.tag_bind(aoe.id, "<Button-1>", lambda e: self.setActiveElement(aoe))
-        self.tag_bind(aoe.id, "<Leave>", lambda e: self.setActiveElement(None))
 
         # Move AOEs behind tokens
         try:
@@ -114,15 +105,14 @@ class Map(tk.Canvas):
         self.unbind("<ButtonRelease-1>", self.addAOEBind)
         self.master.hideMessage()
 
-    def removeAOE(self, aoe):
-        try:
-            self.aoe.remove(aoe)
-        except ValueError:
-            print("aoe does not exist in the map.")
-            return
-
-        colors.append(aoe.color)
-        self.delete(aoe.id)
+    def removeElement(self, element):
+        if type(element) is Token:
+            self.tokens.remove(element)
+        elif type(element) is AOE:
+            self.aoe.remove(element)
+        
+        self.colors.append(element.color)
+        self.delete(element.id)
 
     def getColor(self):
         try:
