@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 import DiceRoller
-from Chara import Character
+import Chara
 import InitTracker
 import AudioPlayer
 import Map
@@ -38,10 +38,11 @@ class DNDHelper(ttk.Frame):
         self.diceRollerWidget = DiceRoller.DiceRollerWidget(self)
         self.diceRollerWidget.grid(column=3, row=0, padx=10, pady=10, sticky=tk.N)
 
-        self.createCharacterWidget()
+        self.characterWidget = Chara.CharacterWidget(self)
+        self.characterWidget.grid(column=3, row=1, padx=10, pady=10, sticky = tk.W+tk.N+tk.N)
 
         self.initiativeWidget = InitTracker.ITrackerWidget(self)
-        self.initiativeWidget.grid(column=3, row=1, padx=10, pady=10, sticky = tk.W+tk.N+tk.N)
+        self.initiativeWidget.grid(column=3, row=0, padx=10, pady=10, sticky = tk.W+tk.S)
 
     def createPlaylistWidget(self):
 
@@ -101,14 +102,6 @@ class DNDHelper(ttk.Frame):
                 selection=""
                 print("nothing selected")
             return selection
-
-    def createCharacterWidget(self):
-        self.characterWidgetContainer = ttk.Frame(self, width=350, height=200, style="BW.TFrame")
-        self.characterWidgetContainer.grid(column=3, row=2, padx=10, pady=10)
-
-        self.tempvar = "~Character~"
-
-        ttk.Label(self.characterWidgetContainer, text=self.tempvar).grid(column=3,row=1)
 
 
 if __name__ == "__main__":
