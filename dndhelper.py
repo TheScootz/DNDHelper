@@ -30,65 +30,14 @@ class DNDHelper(ttk.Frame):
         style = ttk.Style()
         style.configure("BW.TFrame", background='#000')
         # Create GUI elements and add them to the grid
-        self.createPlaylistWidget()
         self.createMapWidget()
         self.createDiceRollerWidget()
+
+        self.audioPlayerWidget = AudioPlayer.AudioPlayerWidget(self)
+        self.audioPlayerWidget.grid(column=0, row=0, rowspan=3, padx=10, pady=10)
+
         self.createCharacterWidget()
         self.createInitiativeTrackerWidget()
-
-    def createPlaylistWidget(self):
-
-        self.audioPlayer = AudioPlayer.AudioPlayer()
-
-        self.playlistWidgetContainer = ttk.Frame(self, width=400, height=800)
-        self.playlistWidgetContainer.grid(column=0, row=0, rowspan=3, padx=10, pady=10)
-
-        self.playlistControlsContainer = ttk.Frame(self.playlistWidgetContainer, width=410, height=100, style="BW.TFrame")
-        self.playlistControlsContainer.grid(column=0, row=0, rowspan=3, padx=10, pady=10)
-
-        self.playButton = ttk.Button(self.playlistControlsContainer, text="Play",
-            command=lambda:self.audioPlayer.play())
-
-        self.nextButton = ttk.Button(self.playlistControlsContainer, text=">",
-            command=lambda:self.audioPlayer.playNextSong())
-        self.prevButton = ttk.Button(self.playlistControlsContainer, text="<",
-            command=lambda:self.audioPlayer.playPrevSong())
-        self.playButton.grid(column=1, row=1)        
-        self.nextButton.grid(column=2, row=1)
-        self.prevButton.grid(column=0, row=1)
-
-
-        self.tree = ttk.Treeview(self.playlistWidgetContainer, columns=("song_name", "length_name"), show="headings", height=22)
-        self.tree.grid(column=0, row=3, padx=10, pady=10)   
-
-        self.audioPlayer.setUp(treeWidget=self.tree)
-        self.tree.column("song_name")
-        self.tree.column("length_name",width=100)
-        self.tree.heading("song_name",text="Name")
-        self.tree.heading("length_name", text="Length")
-
-        self.playlistButtonContainer = ttk.Frame(self.playlistWidgetContainer)
-        self.playlistButtonContainer.grid(column=0, row=6, padx=10, pady=10)
-        #tag used to differentiate playlist and songs
-        playlistTag = "pTag"
-        self.tree.tag_configure(playlistTag, background="#E8E8E8")
-
-        self.createPlaylistButton = ttk.Button(self.playlistButtonContainer, text="Create Playlist", 
-            command=lambda:self.audioPlayer.createPlaylist(tag=playlistTag))
-        self.addSongButton = ttk.Button(self.playlistButtonContainer, text="Add Song",
-            command=lambda:self.audioPlayer.addSong())
-        self.deleteButton = ttk.Button(self.playlistButtonContainer, text="Delete",
-            command=lambda:self.audioPlayer.deleteItem())
-        self.importButton = ttk.Button(self.playlistButtonContainer, text="Import",
-            command=lambda:self.audioPlayer.importPlaylists())
-        self.exportButton = ttk.Button(self.playlistButtonContainer, text="Export",
-            command=lambda:self.audioPlayer.exportPlaylists())
-
-        self.createPlaylistButton.grid(column=0, row=0, sticky='w')
-        self.addSongButton.grid(column=1, row=0)
-        self.deleteButton.grid(column=2, row=0, sticky='e')
-        self.importButton.grid(column=0, row=1)
-        self.exportButton.grid(column=1, row=1)
 
     def createMapWidget(self):
         self.mapWidgetContainer = ttk.Frame(self, width=800, height=800)
