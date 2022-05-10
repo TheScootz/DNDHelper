@@ -31,7 +31,6 @@ class DNDHelper(ttk.Frame):
         style = ttk.Style()
         style.configure("BW.TFrame", background='#000')
         # Create GUI elements and add them to the grid
-        self.createPlaylistWidget()
         self.mapWidget = Map.MapWidget(self, width=800, height=800)
         self.mapWidget.grid(column=1, row=0, padx=10, pady=10, rowspan=3, columnspan=2)
 
