@@ -172,6 +172,12 @@ class Map(tk.Canvas):
 
     def setActiveElement(self, element):
         self.activeElement = element
+        
+    def clear(self):
+        for t in self.tokens:
+            self.delete(t.id)
+        for a in self.aoe:
+            self.delete(a.id)
 
 
         
@@ -320,13 +326,11 @@ class MapWidget(ttk.Frame):
         self.mapButtonContainer = ttk.Frame(self, width=800, height=120, style="BW.TFrame")
         self.mapButtonContainer.grid(column=0, row=2, padx=10, pady=10, sticky=tk.S)
 
-        self.setBackgroundButton = ttk.Button(self.mapButtonContainer, text="Set Background", command=self.setBackground)
-        self.addCharacterButton = ttk.Button(self.mapButtonContainer, text="Add Character", command=self.promptChar)
-        self.addAOEButton = ttk.Button(self.mapButtonContainer, text="Add Area of Effect", command=self.promptAOE)
-        self.setBackgroundButton.grid(column=0, row=0, sticky=tk.W)
-        self.addCharacterButton.grid(column=1, row=0)
-        self.addAOEButton.grid(column=2, row=0, sticky=tk.E)
+        ttk.Button(self.mapButtonContainer, text="Set Background", command=self.setBackground).grid(column=0, row=0, sticky=tk.W)
+        ttk.Button(self.mapButtonContainer, text="Add Character", command=self.promptChar).grid(column=1, row=0)
+        ttk.Button(self.mapButtonContainer, text="Add Area of Effect", command=self.promptAOE).grid(column=2, row=0, sticky=tk.E)
         ttk.Button(self.mapButtonContainer, text="Set Scale", command=self.setScale).grid(column=3, row=0)
+        ttk.Button(self.mapButtonContainer, text="Clear Map", command=self.map.clear).grid(column=4, row=0)
 
         self.message = ttk.Label(self)
         self.message.grid(column=0, row=3)
