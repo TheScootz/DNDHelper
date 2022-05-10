@@ -36,7 +36,6 @@ class Map(tk.Canvas):
         # Listen for element move and delete events
         self.bind("<B1-Motion>", self.moveElement)
         self.tag_bind("background", "<Button-1>", lambda e: self.setActiveElement(None))
-        self.bind("<Button-3>", lambda e: self.removeElement(self.activeElement))
 
         self.testElements()
 
@@ -67,6 +66,7 @@ class Map(tk.Canvas):
 
         # Listen for drag movement
         self.tag_bind(token.id, "<Button-1>", lambda e: self.setActiveElement(token))
+        self.tag_bind(token.id, "<Button-3>", lambda e: self.removeElement(token))
         
         # Move tokens in front of AOEs
         try:
@@ -91,6 +91,7 @@ class Map(tk.Canvas):
 
         # Listen for drag movement
         self.tag_bind(aoe.id, "<Button-1>", lambda e: self.setActiveElement(aoe))
+        self.tag_bind(aoe.id, "<Button-3>", lambda e: self.removeElement(aoe))
 
         # Move AOEs behind tokens
         try:
