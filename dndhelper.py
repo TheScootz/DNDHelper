@@ -1,6 +1,5 @@
 import tkinter as tk
 from tkinter import ttk
-from tkinter import scrolledtext
 import DiceRoller
 import AudioPlayer
 import Map
@@ -31,8 +30,12 @@ class DNDHelper(ttk.Frame):
         style.configure("BW.TFrame", background='#000')
         # Create GUI elements and add them to the grid
         self.createPlaylistWidget()
-        self.createMapWidget()
-        self.createDiceRollerWidget()
+        self.mapWidget = Map.MapWidget(self, width=800, height=800)
+        self.mapWidget.grid(column=1, row=0, padx=10, pady=10, rowspan=3, columnspan=2)
+
+        self.diceRollerWidget = DiceRoller.DiceRollerWidget(self)
+        self.diceRollerWidget.grid(column=3, row=0, padx=10, pady=10, sticky=tk.N)
+
         self.createCharacterWidget()
         self.createInitiativeTrackerWidget()
 
@@ -92,56 +95,7 @@ class DNDHelper(ttk.Frame):
                 selection=""
                 print("nothing selected")
             return selection
-
-    def createMapWidget(self):
-        self.mapWidgetContainer = ttk.Frame(self, width=800, height=800)
-        self.mapWidgetContainer.grid(column=1, row=0, padx=10, pady=10, rowspan=3, columnspan=2)
-
-        self.map = Map.Map(self.mapWidgetContainer, width=800, height=600)
-        self.map.grid(column=0, row=0, padx=10, pady=10, sticky=(tk.N, tk.W, tk.E, tk.S))
-
-        self.mapButtonContainer = ttk.Frame(self.mapWidgetContainer, width=800, height=120, style="BW.TFrame")
-        self.mapButtonContainer.grid(column=0, row=2, padx=10, pady=10, sticky=tk.S)
-
-        self.setBackgroundButton = ttk.Button(self.mapButtonContainer, text="Set Background", command=self.setBackground)
-        self.addCharacterButton = ttk.Button(self.mapButtonContainer, text="Add Character")
-        self.addAOEButton = ttk.Button(self.mapButtonContainer, text="Add Area of Effect")
-        self.setBackgroundButton.grid(column=0, row=0, sticky=tk.W)
-        self.addCharacterButton.grid(column=1, row=0)
-        self.addAOEButton.grid(column=2, row=0, sticky=tk.E)
-
-    def createDiceRollerWidget(self):
-        # Create containers
-        self.diceRollerWidgetContainer = ttk.Frame(self)
-        self.diceRollerWidgetContainer.grid(column=3, row=0, padx=10, pady=10, sticky=tk.N)
-
-        self.diceRollerContainer = ttk.Frame(self.diceRollerWidgetContainer)
-        self.diceRollerLog = scrolledtext.ScrolledText(self.diceRollerWidgetContainer, state="disabled", width=40, height=10)
-
-        self.diceRollerContainer.grid(column=0, row=0, padx=10, pady=10, sticky=tk.N)
-        self.diceRollerLog.grid(column=0, row=1, padx=10, pady=10, sticky=tk.N+tk.S)
-
-
-        # Set up Dice Roller interface
-        self.diceResult = ttk.Label(self.diceRollerContainer)
-        self.diceNum = tk.StringVar()
-        self.diceSides = tk.StringVar()
         
-        self.diceResult.grid(column=0, row=0, columnspan=5, pady=10)
-
-        ttk.Label(self.diceRollerContainer, text="Roll").grid(column=0, row=1)
-        ttk.Entry(self.diceRollerContainer, width=2, textvariable=self.diceNum).grid(column=1, row=1)
-        ttk.Label(self.diceRollerContainer, text="dice with").grid(column=2, row=1)
-        ttk.Entry(self.diceRollerContainer, width=3, textvariable=self.diceSides).grid(column=3, row=1)
-        ttk.Label(self.diceRollerContainer, text="sides").grid(column=4, row=1)
-
-        ttk.Button(self.diceRollerContainer, text="Roll", command=self.rollDice).grid(column=0, row=2, columnspan=5, pady=5)
-
-
-        # Set up Dice Roller log
-        #self.diceResults = []
-
-
     def createCharacterWidget(self):
         self.characterWidgetContainer = ttk.Frame(self, width=350, height=200, style="BW.TFrame")
         self.characterWidgetContainer.grid(column=3, row=1, padx=10, pady=10)
@@ -150,22 +104,6 @@ class DNDHelper(ttk.Frame):
     def createInitiativeTrackerWidget(self):
         self.initiativeTracker = ttk.Frame(self, width=350, height=200, style="BW.TFrame")
         self.initiativeTracker.grid(column=3, row=2, padx=10, pady=10)
-
-    
-    def rollDice(self, *args):
-        self.diceRoller = DiceRoller.DiceRoller(int(self.diceNum.get()), int(self.diceSides.get()))
-        self.diceRoller.roll()
-        self.diceResult.config(text=self.diceRoller.resultString())
-        #self.diceResults.insert(0, self.diceRoller.result.copy())
-        
-        self.diceRollerLog["state"] = "normal"
-        self.diceRollerLog.insert("1.0", "{}d{}: {}\n\n".format(self.diceRoller.num, self.diceRoller.sides, self.diceRoller.resultString()))
-        self.diceRollerLog["state"] = "disabled"
-
-    def setBackground(self, *args):
-        imagepath = tk.filedialog.askopenfilename(filetypes=["{Image files} {.jpg .png .gif .bmp}"])
-        if imagepath != "":
-            self.map.setBackground(imagepath)
 
 
    
