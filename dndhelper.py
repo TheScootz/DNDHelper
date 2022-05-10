@@ -147,12 +147,29 @@ class DNDHelper(ttk.Frame):
 
     def createCharacterWidget(self):
         self.characterWidgetContainer = ttk.Frame(self, width=350, height=200, style="BW.TFrame")
-        self.characterWidgetContainer.grid(column=3, row=1, padx=10, pady=10)
+        self.characterWidgetContainer.grid(column=3, row=2, padx=10, pady=10)
+
+        self.tempvar = "~Character~"
+
+        ttk.Label(self.characterWidgetContainer, text=self.tempvar).grid(column=3,row=1)
 
 
     def createInitiativeTrackerWidget(self):
-        self.initiativeTracker = ttk.Frame(self, width=350, height=200, style="BW.TFrame")
-        self.initiativeTracker.grid(column=3, row=2, padx=10, pady=10)
+        self.initiativeTrackerWidgetContainer = ttk.Frame(self, width=350, height=200)
+        self.initiativeTrackerWidgetContainer.grid(column=3, row=1, columnspan=5, padx=10, pady=10,sticky=(tk.W,tk.N))
+
+        self.initiativelist = ITracker(30)
+
+        self.initActive = self.initiativelist.initActive
+        self.thisTurn = self.initiativelist.initiative
+        self.nextTurn = self.initiativelist.next
+
+        self.stepButton = ttk.Button(self.initiativeTrackerWidgetContainer, text="Next Turn")
+
+        ttk.Label(self.initiativeTrackerWidgetContainer, text="Initiative: "+self.initiativelist.getActive()).grid(column=3,row=1)
+        if self.initActive == True:
+            ttk.Label(self.initiativeTrackerWidgetContainer, text="Current Turn: "+str(self.initiativelist.getInit(self.thisTurn))).grid(column=3,row=2)
+            ttk.Label(self.initiativeTrackerWidgetContainer, text="Next Turn: "+str(self.initiativelist.getInit(self.nextTurn))).grid(column=3,row=3)
 
 
     def rollDice(self, *args):
@@ -172,90 +189,6 @@ class DNDHelper(ttk.Frame):
             self.map.setBackground(imagepath)
 
 
-def InitTest():
-
-    i = ITracker(25)
-
-    print("Populating Initiative List...\n")
-    i.addCharacter("Simeon",12)
-    i.addCharacter("Trystan",13)
-    i.addCharacter("Strahd von Zarovich",22)
-    i.addCharacter("Kanon Fodda",1)
-    i.addCharacter("Peirro Vaylow",20)
-    i.addCharacter("Tommy",13)
-    i.printInit()
-
-    print("\nRemoving plot-irrelevant character Strahd...")
-    i.removeCharacter("Strahd von Zarovich",22)
-    i.printInit()
-
-    print("\nPrinting starting initiative...\n")
-    i.startInitiative()
-    i.printInit()
-    print("\nRound 1, Turn 1:")
-    i.stepInitiative()
-    i.printInit()
-    print("\nRound 1, Turn 2:")
-    i.stepInitiative()
-    i.printInit()
-    print("\nRound 1, Turn 3:")
-    i.stepInitiative()
-    i.printInit()
-    print("\nEnding/clearing initiative list...")
-    i.endInitiative()
-
-
-def CharTest():
-
-    print("Creating two characters 'Benji' and 'Rowan'...")
-    c = Character("Benji", 21)
-    c2 = Character("Rowan", 11)
-    #c = Character("Kamaou", 300, 7000, {"STR":20,"DEX":8,"CON":18,"INT":14,"WIS":12,"CHA":10})
-
-    c.printChara()
-    c2.printChara()
-
-    print("Detailing Benji with Sanity and a 'Charmed' status...")
-    c.toggleSanity(5)
-    c.addStatus("Charmed",100)
-    c.printChara()
-
-    print("Detailing Rowan with Sanity...")
-    c2.toggleSanity(13)
-    print("Renaming 'Rowan' to 'Kamaou', and adding Ability Scores...")
-    c2.rename("Kamaou")
-    c2.modAll([20,8,18,14,12,10])
-    c2.printChara()
-
-    print("Creating new character 'Jasper' with Sanity and one ability score...")
-    c3 = Character("Jasper",46)
-    c3.toggleSanity(8)
-    c3.modScores("INT",17)
-    c3.printChara()
-
-    print("Give Benji 50XP, ")
-
-
-def SongsTest():
-    s = Song("song1", "artist1", "url1",)
-    s1 = Song("song2", "artist1", "url2")
-    s2 = Song("song3", "artist1", "url3")
-    s3 = Song("ambience_song4", "artist1", "url4")
-    s4 = Song("epic_song", "artist1", "url5")
-
-    m = Playlist("music")
-    m.add(s)
-    m.add(s1)
-    m.add(s2)
-
-    a = Playlist("ambience")
-    a.add(s3)
-
-    mainPlaylist = Playlist("dndGame")
-    mainPlaylist.add(m)
-    mainPlaylist.add(a)
-    mainPlaylist.add(s4)
-    mainPlaylist.print()
 
 
 if __name__ == "__main__":
