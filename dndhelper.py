@@ -44,72 +44,13 @@ class DNDHelper(ttk.Frame):
         self.initiativeWidget = InitTracker.ITrackerWidget(self)
         self.initiativeWidget.grid(column=3, row=0, padx=10, pady=10, sticky = tk.W+tk.S)
 
-    def createPlaylistWidget(self):
+        self.audioPlayerWidget = AudioPlayer.AudioPlayerWidget(self)
+        self.audioPlayerWidget.grid(column=0, row=0, rowspan=3, padx=10, pady=10)
 
-        self.audioPlayer = AudioPlayer.AudioPlayer()
-
-        self.playlistWidgetContainer = ttk.Frame(self, width=400, height=800)
-        self.playlistWidgetContainer.grid(column=0, row=0, rowspan=3, padx=10, pady=10)
-
-        self.playlistControlsContainer = ttk.Frame(self.playlistWidgetContainer, width=410, height=100, style="BW.TFrame")
-        self.playlistControlsContainer.grid(column=0, row=0, rowspan=3, padx=10, pady=10)
-
-        self.playButton = ttk.Button(self.playlistControlsContainer, text="Play",
-            command=lambda:self.audioPlayer.play(treeWidget=self.tree, selectedItemID=currentSelection()))
-
-        self.nextButton = ttk.Button(self.playlistControlsContainer, text=">",
-            command=lambda:self.audioPlayer.playNextSong(treeWidget=self.tree, nextSelection=self.tree.next(currentSelection())))
-        self.prevButton = ttk.Button(self.playlistControlsContainer, text="<",
-            command=lambda:self.audioPlayer.play(treeWidget=self.tree, selectedItemID=self.tree.prev(currentSelection())))
-        #self.playButton.grid(column=1, row=1)
-            #command=lambda:self.audioPlayer.playPrevSong(treeWidget=self.tree, prevSelection=self.tree.prev(currentSelection())))
-        self.playButton.grid(column=1, row=1)
-        self.nextButton.grid(column=2, row=1)
-        self.prevButton.grid(column=0, row=1)
-
-
-        self.tree = ttk.Treeview(self.playlistWidgetContainer, columns=("song_name", "length_name"), show="headings", height=22)
-        self.tree.grid(column=0, row=3, padx=10, pady=10)
-
-        self.tree.column("song_name")
-        self.tree.column("length_name",width=100)
-        self.tree.heading("song_name",text="Name")
-        self.tree.heading("length_name", text="Length")
-
-        self.playlistButtonContainer = ttk.Frame(self.playlistWidgetContainer, width=400, height=120, style="BW.TFrame")
-        self.playlistButtonContainer.grid(column=0, row=6, padx=10, pady=10)
-        #tag used to differentiate playlist and songs
-        playlistTag = "pTag"
-        self.tree.tag_configure(playlistTag, background="#E8E8E8")
-
-        self.createPlaylistButton = ttk.Button(self.playlistButtonContainer, text="Create Playlist",
-            command=lambda:self.audioPlayer.createPlaylist(treeWidget=self.tree, tag=playlistTag))
-
-        self.addSongButton = ttk.Button(self.playlistButtonContainer, text="Add Song",
-            command=lambda:self.audioPlayer.addSong(treeWidget=self.tree, selectedItemID=currentSelection()))
-
-        self.deleteButton = ttk.Button(self.playlistButtonContainer, text="Delete",
-            command=lambda:self.audioPlayer.deleteItem(treeWidget=self.tree, selectedItemID=currentSelection()))
-        self.createPlaylistButton.grid(column=0, row=0, sticky='w')
-        self.addSongButton.grid(column=1, row=0)
-        self.deleteButton.grid(column=2, row=0, sticky='e')
-
-        def currentSelection():
-            selection=""
-            try:
-                selection= self.tree.selection()[0]
-            except IndexError as e:
-                selection=""
-                print("nothing selected")
-            return selection
-
-
+    
 if __name__ == "__main__":
     app = DNDHelper()
     app.master.title("D&D Helper")
 
     app.mainloop()
-
-    #SongsTest()
-    #InitTest()
-    #CharTest()
+    
