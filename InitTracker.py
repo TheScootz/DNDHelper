@@ -9,24 +9,55 @@ class ITrackerWidget(ttk.Frame):
         self.initiativeTrackerWidgetContainer = ttk.Frame(self, width=250, height=200)
         self.initiativeTrackerWidgetContainer.grid(column=3, row=1, columnspan=5, padx=10, pady=10,sticky=(tk.W+tk.N,tk.N))
 
-        self.initiativelist = ITracker(30)
+        self.initiativelist = ITracker(50)
 
-        self.initActive = self.initiativelist.initActive
+        self.initActive = False#self.initiativelist.initActive
+        self.thisTurn = None#self.initiativelist.initiative
+        self.nextTurn = None#self.initiativelist.next
+
+        self.startButton = ttk.Button(self.initiativeTrackerWidgetContainer, text="Start Initiative", command=self.makeInit)
+        self.startButton.grid(column=0, row=2, columnspan=5, pady=5)
+
+        self.stepButton = ttk.Button(self.initiativeTrackerWidgetContainer, text="Next Turn", command=self.stepInit)
+        #self.stepButton.grid(column=0, row=2, columnspan=5, pady=5,sticky = tk.N+tk.W)
+        #self.stepButton.grid_remove()
+
+        self.endButton = ttk.Button(self.initiativeTrackerWidgetContainer, text="End Initiative", command=self.endInit)
+        #self.endButton.grid(column=0, row=2, columnspan=5, pady=5, sticky = tk.N+tk.E)
+        #self.endButton.grid_remove()
+
+        ttk.Label(self.initiativeTrackerWidgetContainer, text="Initiative: "+self.initiativelist.getActive()).grid(column=3,row=1)
+        self.curTurnLabel = None
+        self.nextTurnLabel = None
+
+
+    def makeInit(self):
+        self.initActive = True
+        self.initiativelist.startInitiative()
         self.thisTurn = self.initiativelist.initiative
         self.nextTurn = self.initiativelist.next
 
-        #self.stepButton = ttk.Button(self.initiativeTrackerWidgetContainer, text="Next Turn")
-        ttk.Button(self.initiativeTrackerWidgetContainer, text="Start Initiative", command=self.initiativelist.startInitiative()).grid(column=0, row=2, columnspan=5, pady=5)
+        self.curTurnLabel = ttk.Label(self.initiativeTrackerWidgetContainer, text="Current Turn: "+str(self.initiativelist.getInit(self.thisTurn)))
+        self.nextTurnLabel = ttk.Label(self.initiativeTrackerWidgetContainer, text="Next Turn: "+str(self.initiativelist.getInit(self.nextTurn)))
+        self.curTurnLabel.grid(column=3,row=2)
+        self.nextTurnLabel.grid(column=3,row=3)
 
-        ttk.Label(self.initiativeTrackerWidgetContainer, text="Initiative: "+self.initiativelist.getActive()).grid(column=3,row=1)
-        if self.initActive == True:
-            ttk.Label(self.initiativeTrackerWidgetContainer, text="Current Turn: "+str(self.initiativelist.getInit(self.thisTurn))).grid(column=3,row=2)
-            ttk.Label(self.initiativeTrackerWidgetContainer, text="Next Turn: "+str(self.initiativelist.getInit(self.nextTurn))).grid(column=3,row=3)
+        self.startButton.grid_remove()
+        self.stepButton.grid(column=0, row=0, columnspan=5, pady=5,sticky = tk.W)
+        self.endButton.grid(column=4, row=0, columnspan=5, pady=5, sticky = tk.E)
 
 
-    def makeInit(self,iCount):
-        return ITracker(iCount)
+    def stepInit(self):
+        self.initiativelist.stepInitiative()
 
+
+    def endInit(self):
+        self.initiativelist.endInitiative()
+        self.startButton.grid(column=0, row=2, columnspan=5, pady=5)
+        self.curTurnLabel.grid_remove()
+        self.nextTurnLabel.grid_remove()
+        self.stepButton.grid_remove()
+        self.endButton.grid_remove()
 
 
 class ITracker:
@@ -93,7 +124,7 @@ class ITracker:
 
 
     def startInitiative(self):
-        #print("TEST")
+        print("TEST")
         self.initActive = True
         self.initiative = len(self.initiativeList)
         self.next = len(self.initiativeList)

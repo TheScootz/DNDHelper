@@ -1,3 +1,20 @@
+import tkinter as tk
+from tkinter import ttk
+
+class CharacterWidget(ttk.Frame):
+
+    def __init__(self, master, **kwargs):
+
+        super().__init__(master, **kwargs)
+
+        self.characterWidgetContainer = ttk.Frame(self, width=350, height=200)
+        self.characterWidgetContainer.grid(column=3, row=2, padx=10, pady=10)
+
+        self.tempvar = "~Character~"
+
+        ttk.Label(self.characterWidgetContainer, text=self.tempvar).grid(column=3,row=1)
+
+
 class Character():
 
     def __init__(self, cname, hp):
