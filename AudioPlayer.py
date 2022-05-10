@@ -22,28 +22,47 @@ class AudioPlayer:
 			pygame.mixer.music.unpause()
 		self.tmpWidget=treeWidget 	#TODO Fix this
 
-		if(selectedItemID != ""):
+		self.playSelected(treeWidget, selectedItemID)
+
+
+	def playSelected(self, treeWidget, selectedItemID):
+		if (selectedItemID != ""):
 			selectedItemName = treeWidget.item(selectedItemID)["values"][0]
-			if("playlist" in selectedItemName):
+			if ("playlist" in selectedItemName):
 				# selected playlist
-				children=treeWidget.get_children(selectedItemID)
-				if(len(children) > 0):
-					self.playlistSongs=[]
+				children = treeWidget.get_children(selectedItemID)
+				if (len(children) > 0):
+					self.playlistSongs = []
 					for child in children:
 						self.playlistSongs.append(treeWidget.item(child)["values"][2])
 					self.playPlaylist()
 			else:
-				#selected single song that will loop
+				# selected single song that will loop
 				self.playSong(path=treeWidget.item(selectedItemID)["values"][2], loops=-1)
+
 
 	def playSong(self, path, loops=0):
 		pygame.mixer.music.load(path)
 		pygame.mixer.music.play(loops=loops)
 
 
+	def playNextSong(self, treeWidget, nextSelection):
+		path=treeWidget.item(nextSelection)["values"][2]
+		treeWidget.selection_set(path)
+		self.playSelected(treeWidget, nextSelection)
+
+
+	def playPrevSong(self, treeWidget, prevSelection):
+		path=treeWidget.item(prevSelection)["values"][2]
+		treeWidget.selection_set(path)
+		self.playSelected(treeWidget, prevSelection)
+
+
 	def playPlaylist(self):
 		if(len(self.playlistSongs) > 0):
-			self.playSong(self.playlistSongs.pop(0))
+			path=self.playlistSongs.pop(0)
+			self.playSong(path)
+			self.tmpWidget.selection_set(path)
 			self.updatePlaylist()
 
 
@@ -68,18 +87,22 @@ class AudioPlayer:
 				path = self.openFile()
 				length = ""
 				try:
-					length = datetime.timedelta(seconds=MP3(path).info.length)
+					length = str(datetime.timedelta(seconds=MP3(path).info.length)).split(".")[0]
 				except Exception as e:
 					length ="N/A"
 
 				tempSong = Song(name=os.path.basename(path), length=length, url=path)
-				treeWidget.insert(selectedItemID, "end", values=(tempSong.name, tempSong.length, tempSong.url))
+				treeWidget.insert(selectedItemID, "end", values=(tempSong.name, tempSong.length, tempSong.url), iid=tempSong.url)
 
 
 	def deleteItem(self, treeWidget, selectedItemID):
-		if(selectedItemID != ""):
-			pygame.mixer.music.stop()
+		if (selectedItemID != ""):
+			selectedItemName = treeWidget.item(selectedItemID)["values"][0]
+			#if a playlist was selected for deletion make sure to empty list
+			if ("playlist" in selectedItemName):
+				self.playlistSongs = []
 			treeWidget.delete(selectedItemID)
+			pygame.mixer.music.stop()
 
 
 	def openFile(self):
