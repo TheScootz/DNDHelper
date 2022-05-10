@@ -99,6 +99,13 @@ class Map(tk.Canvas):
             self.tag_lower(aoe.id, "token")
         # No tokens exist
         except tk.TclError: pass
+        
+    def addNextToken(self, event):
+        pos = self.convertPos((event.x, event.y))
+        #self.nextToken.position = pos
+        self.addToken(Token(2, 0, pos))
+        self.unbind("<ButtonRelease-1>", self.addTokenBind)
+        self.master.hideMessage()
 
     def addNextAOE(self, event):
         pos = self.convertPos((event.x, event.y))
@@ -314,7 +321,7 @@ class MapWidget(ttk.Frame):
         self.mapButtonContainer.grid(column=0, row=2, padx=10, pady=10, sticky=tk.S)
 
         self.setBackgroundButton = ttk.Button(self.mapButtonContainer, text="Set Background", command=self.setBackground)
-        self.addCharacterButton = ttk.Button(self.mapButtonContainer, text="Add Character", command=self.map.refresh)
+        self.addCharacterButton = ttk.Button(self.mapButtonContainer, text="Add Character", command=self.promptChar)
         self.addAOEButton = ttk.Button(self.mapButtonContainer, text="Add Area of Effect", command=self.promptAOE)
         self.setBackgroundButton.grid(column=0, row=0, sticky=tk.W)
         self.addCharacterButton.grid(column=1, row=0)
@@ -328,6 +335,9 @@ class MapWidget(ttk.Frame):
         imagepath = tk.filedialog.askopenfilename(filetypes=["{Image files} {.jpg .png .gif .bmp}"])
         if imagepath != "":
             self.map.setBackground(imagepath)
+
+    def promptChar(self, *args):
+        self.map.addTokenBind = self.map.bind("<ButtonRelease-1>", self.map.addNextToken, add="+")
 
     def promptAOE(self, *args):
         dialog = AOEDialog(self)

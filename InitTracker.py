@@ -16,7 +16,7 @@ class ITrackerWidget(ttk.Frame):
         self.nextTurn = self.initiativelist.next
 
         #self.stepButton = ttk.Button(self.initiativeTrackerWidgetContainer, text="Next Turn")
-        ttk.Button(self.initiativeTrackerWidgetContainer, text="Start Initiative", command=self.initiativelist.startInitiative()).grid(column=0, row=2, columnspan=5, pady=5)
+        ttk.Button(self.initiativeTrackerWidgetContainer, text="Start Initiative", command=self.initiativelist.startInitiative).grid(column=0, row=2, columnspan=5, pady=5)
 
         ttk.Label(self.initiativeTrackerWidgetContainer, text="Initiative: "+self.initiativelist.getActive()).grid(column=3,row=1)
         if self.initActive == True:
