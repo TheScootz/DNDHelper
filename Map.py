@@ -27,11 +27,13 @@ class Map(tk.Canvas):
         self.aoe = []
         self.colors = COLORS.copy()
         self.scale = 10 # Scale of the map represents pixels per foot
+        self.activeElement = None
         random.shuffle(self.colors)
 
         # Listen for mouse down to start drag-scroll 
         self.bind("<Button-1>", self.logPos)
-        self.bind("<B1-Motion>", self.dragScroll)
+        self.tag_bind("background", "<B1-Motion>", self.dragScroll)
+        self.bind("<B1-Motion>", self.moveElement)
 
         self.testTokens()
 
@@ -51,13 +53,20 @@ class Map(tk.Canvas):
         self.create_image(0, 0, image=self.background, anchor='nw', tag="background")
 
     def addToken(self, token):
-        if token in self.tokens: return
-        self.tokens.append(token)
-        token.color = self.getColor()
+        if token not in self.tokens:
+            self.tokens.append(token)
+        if token.color is None:
+            token.color = self.getColor()
 
         pos_tl = [x-(token.radius*self.scale) for x in token.position]
         pos_br = [x+(token.radius*self.scale) for x in token.position]
-        token.id = self.create_oval(*pos_tl, *pos_br, fill=token.color, width=5, tag="token")
+        token.id = sid = self.create_oval(*pos_tl, *pos_br, fill=token.color, width=5, tag="token")
+
+        # Listen for drag movement
+        self.tag_bind(token.id, "<Button-1>", lambda e: self.setActiveElement(token))
+        self.tag_bind(token.id, "<Leave>", lambda e: self.setActiveElement(None))
+        
+        # Move tokens in front of AOEs
         try:
             self.tag_raise(token.id, "aoe")
         # No AOEs exist
@@ -74,18 +83,25 @@ class Map(tk.Canvas):
         self.delete(token.id)
 
     def addAOE(self, aoe):
-        if aoe in self.aoe: return
-        self.aoe.append(aoe)
-        aoe.color = self.getColor()
+        if aoe not in self.aoe:
+            self.aoe.append(aoe)
+        if aoe.color is None:
+            aoe.color = self.getColor()
         
         if aoe.shape == CIRCLE:
             pos_tl = [x-(aoe.size*self.scale) for x in aoe.position]
             pos_br = [x+(aoe.size*self.scale) for x in aoe.position]
-            aoe.id = self.create_oval(*pos_tl, *pos_br, fill=aoe.color, tag="aoe")
+            aoe.id = sid = self.create_oval(*pos_tl, *pos_br, fill=aoe.color, tag="aoe")
         elif aoe.shape == RECTANGLE:
             pos_tl = (aoe.position[0]-(aoe.size[0]*self.scale)//2, aoe.position[1]-(aoe.size[1]*self.scale)//2)
             pos_br = (aoe.position[0]+(aoe.size[0]*self.scale)//2, aoe.position[1]+(aoe.size[1]*self.scale)//2)
-            aoe.id = self.create_rectangle(*pos_tl, *pos_br, fill=aoe.color, tag="aoe")
+            aoe.id = sid = self.create_rectangle(*pos_tl, *pos_br, fill=aoe.color, tag="aoe")
+
+        # Listen for drag movement
+        self.tag_bind(aoe.id, "<Button-1>", lambda e: self.setActiveElement(aoe))
+        self.tag_bind(aoe.id, "<Leave>", lambda e: self.setActiveElement(None))
+
+        # Move AOEs behind tokens
         try:
             self.tag_lower(aoe.id, "token")
         # No tokens exist
@@ -134,6 +150,30 @@ class Map(tk.Canvas):
         x = self.canvasx(pos[0])
         y = self.canvasy(pos[1])
         return (x, y)
+
+    def refresh(self):
+        for t in self.tokens:
+            self.delete(t.id)
+            self.addToken(t)
+        for a in self.aoe:
+            self.delete(a.id)
+            self.addAOE(a)
+
+    def moveElement(self, event):
+        if self.activeElement is None: return
+        x_diff = event.x - self.lastPos[0]
+        y_diff = event.y - self.lastPos[1]
+        
+        newX = self.activeElement.position[0] + x_diff
+        newY = self.activeElement.position[1] + y_diff
+
+        self.activeElement.position = (newX, newY)
+        self.refresh()
+        self.lastPos = (event.x, event.y)
+
+    def setActiveElement(self, element):
+        self.activeElement = element
+
 
         
 
@@ -282,7 +322,7 @@ class MapWidget(ttk.Frame):
         self.mapButtonContainer.grid(column=0, row=2, padx=10, pady=10, sticky=tk.S)
 
         self.setBackgroundButton = ttk.Button(self.mapButtonContainer, text="Set Background", command=self.setBackground)
-        self.addCharacterButton = ttk.Button(self.mapButtonContainer, text="Add Character")
+        self.addCharacterButton = ttk.Button(self.mapButtonContainer, text="Add Character", command=self.map.refresh)
         self.addAOEButton = ttk.Button(self.mapButtonContainer, text="Add Area of Effect", command=self.promptAOE)
         self.setBackgroundButton.grid(column=0, row=0, sticky=tk.W)
         self.addCharacterButton.grid(column=1, row=0)
@@ -311,7 +351,7 @@ class MapWidget(ttk.Frame):
         
 
 class Token:
-    def __init__(self, radius, height, position=(0,0), color="white", oid=0):
+    def __init__(self, radius, height, position=(0,0), color=None, oid=0):
         self.radius = radius
         self.height = height
         self.position = position
@@ -319,7 +359,7 @@ class Token:
         self.id = oid
 
 class AOE:
-    def __init__(self, shape, size, position=(0,0), color="white", oid=0):
+    def __init__(self, shape, size, position=(0,0), color=None, oid=0):
         self.shape = shape
         self.size = size
         self.position = position
