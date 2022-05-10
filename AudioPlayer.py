@@ -1,6 +1,5 @@
 import os
-from tkinter import ttk
-from tkinter import filedialog
+from tkinter import ttk, filedialog, simpledialog
 from Songs import Song
 import pygame
 from mutagen.mp3 import MP3
@@ -9,7 +8,7 @@ import csv
 
 class AudioPlayer:
 	def __init__(self):
-		self.isPaused=False
+		self.isPaused=True
 		self.fileTypes=(("audio files","*.mp3 *.wav"),("all files","*.*"))
 		self.playlistFileTypes=(("csv files","*.csv"),("all files","*.*"))
 		pygame.init()
@@ -21,21 +20,21 @@ class AudioPlayer:
 		self.tmpWidget=treeWidget
 
 
-	def play(self):
+	def play(self, playButton):
+		self.playSelected(self.tmpWidget.selection()[0])
 		self.isPaused = not self.isPaused
-		if(self.isPaused):
+		if (self.isPaused):
 			pygame.mixer.music.pause()
+			playButton.config(text="Play")
 		else:
 			pygame.mixer.music.unpause()
-		self.playSelected(self.currentSelection())
+			playButton.config(text="||")
 
-
-	def playSelected(self, selectedItemID):
-		if (selectedItemID != ""):
-			selectedItemName = self.tmpWidget.item(selectedItemID)["values"][0]
-			if ("playlist" in selectedItemName):
+	def playSelected(self, selectedItemIID):
+		if (selectedItemIID != ""):
+			if (selectedItemIID.isdigit()):
 				# selected playlist
-				children = self.tmpWidget.get_children(selectedItemID)
+				children = self.tmpWidget.get_children(selectedItemIID)
 				if (len(children) > 0):
 					self.playlistSongs = []
 					for child in children:
@@ -43,7 +42,7 @@ class AudioPlayer:
 					self.playPlaylist()
 			else:
 				# selected single song that will loop
-				self.playSong(path=self.tmpWidget.item(selectedItemID)["values"][2], loops=-1)
+				self.playSong(path=self.tmpWidget.item(selectedItemIID)["values"][2], loops=-1)
 
 
 	def playSong(self, path, loops=0):
@@ -52,18 +51,22 @@ class AudioPlayer:
 
 
 	def playNextSong(self):
-		nextSelection=self.tmpWidget.next(self.currentSelection())
-		path=self.tmpWidget.item(nextSelection)["values"][2]
-		self.tmpWidget.selection_set(path)
-		self.playSelected(nextSelection)
-
+		try:
+			nextSelection=self.tmpWidget.next(self.tmpWidget.selection()[0])
+			path=self.tmpWidget.item(nextSelection)["values"][2]
+			self.tmpWidget.selection_set(path)
+			self.playSelected(nextSelection)
+		except IndexError as e:
+			print("nothing selected")
 
 	def playPrevSong(self):
-		prevSelection=self.tmpWidget.prev(self.currentSelection())
-		path=self.tmpWidget.item(prevSelection)["values"][2]
-		self.tmpWidget.selection_set(path)
-		self.playSelected(prevSelection)
-
+		try:
+			prevSelection=self.tmpWidget.prev(self.tmpWidget.selection()[0])
+			path=self.tmpWidget.item(prevSelection)["values"][2]
+			self.tmpWidget.selection_set(path)
+			self.playSelected(prevSelection)
+		except IndexError as e:
+			print("nothing selected")
 
 	def playPlaylist(self):
 		if(len(self.playlistSongs) > 0):
@@ -81,16 +84,15 @@ class AudioPlayer:
 		self.tmpWidget.after(1000, self.updatePlaylist)
 
 
-	def createPlaylist(self, tag):
+	def createPlaylist(self, tag, name):
 		self.playlistCount+=1
-		self.tmpWidget.insert("", "end", values=("playlist"+str(self.playlistCount),""), open=False, tags=tag)
+		self.tmpWidget.insert("", "end", values=(name,"", self.playlistCount), open=False, tags=tag, iid=str(self.playlistCount))
 
 
 	def addSong(self):
-		selectedItemID=self.currentSelection()
-		if (selectedItemID != ""):
-			selectedItemName = self.tmpWidget.item(selectedItemID)["values"][0]
-			if ("playlist" in selectedItemName):
+		iid=self.tmpWidget.focus()
+		if (iid != ""):
+			if (iid.isdigit()):
 				path = self.openFile()
 				length = ""
 				try:
@@ -99,11 +101,11 @@ class AudioPlayer:
 					length ="N/A"
 
 				tempSong = Song(name=os.path.basename(path), length=length, url=path)
-				self.tmpWidget.insert(selectedItemID, "end", values=(tempSong.name, tempSong.length, tempSong.url), iid=tempSong.url)
+				self.tmpWidget.insert(iid, "end", values=(tempSong.name, tempSong.length, tempSong.url), iid=tempSong.url)
 
 
 	def deleteItem(self):
-		selectedItemID=self.currentSelection()
+		selectedItemID=self.tmpWidget.focus()
 		if (selectedItemID != ""):
 			selectedItemName = self.tmpWidget.item(selectedItemID)["values"][0]
 			#if a playlist was selected for deletion make sure to empty list
@@ -117,23 +119,14 @@ class AudioPlayer:
 		return filedialog.askopenfilename(initialdir=".\\Audio",title="Audio Player",filetypes=self.fileTypes)
 
 
-	def currentSelection(self):
-		selection = ""
-		try:
-			selection = self.tmpWidget.selection()[0]
-		except IndexError as e:
-			selection = ""
-			print("nothing selected")
-		return selection
-
 	def importPlaylists(self):
 		fileselected=filedialog.askopenfilename(initialdir=".\\", title="Import Playlist", filetypes=self.playlistFileTypes)
 		with open(fileselected) as myfile:
 			csvread = csv.reader(myfile, delimiter=',')
 			tmpParent=""
 			for row in csvread:
-				if("playlist" in row[0]):
-					tmpParent=row[0]
+				if(row[2].isdigit()):
+					tmpParent=row[2]
 					self.tmpWidget.insert("", "end", values=row, iid=tmpParent)
 				else:
 					self.tmpWidget.insert(tmpParent, "end", values=row, iid=row[2])
@@ -162,8 +155,8 @@ class AudioPlayerWidget(ttk.Frame):
 		self.playlistControlsContainer = ttk.Frame(self.playlistWidgetContainer, width=410, height=100, style="BW.TFrame")
 		self.playlistControlsContainer.grid(column=0, row=0, rowspan=3, padx=10, pady=10)
 
-		self.playButton = ttk.Button(self.playlistControlsContainer, text="Play",
-			command=lambda:self.audioPlayer.play())
+		self.playButton = ttk.Button(self.playlistControlsContainer, text="Play")
+		self.playButton.configure(command=lambda:self.audioPlayer.play(self.playButton))
 
 		self.nextButton = ttk.Button(self.playlistControlsContainer, text=">",
 			command=lambda:self.audioPlayer.playNextSong())
@@ -186,11 +179,11 @@ class AudioPlayerWidget(ttk.Frame):
 		self.playlistButtonContainer = ttk.Frame(self.playlistWidgetContainer)
 		self.playlistButtonContainer.grid(column=0, row=6, padx=10, pady=10)
 		#tag used to differentiate playlist and songs
-		playlistTag = "pTag"
-		self.tree.tag_configure(playlistTag, background="#E8E8E8")
+		self.playlistTag = "pTag"
+		self.tree.tag_configure(self.playlistTag, background="#E8E8E8")
 
 		self.createPlaylistButton = ttk.Button(self.playlistButtonContainer, text="Create Playlist",
-			command=lambda:self.audioPlayer.createPlaylist(tag=playlistTag))
+			command=lambda:self.openPlaylistCreateWindow())
 		self.addSongButton = ttk.Button(self.playlistButtonContainer, text="Add Song",
 			command=lambda:self.audioPlayer.addSong())
 		self.deleteButton = ttk.Button(self.playlistButtonContainer, text="Delete",
@@ -205,3 +198,8 @@ class AudioPlayerWidget(ttk.Frame):
 		self.deleteButton.grid(column=2, row=0, sticky='e')
 		self.importButton.grid(column=0, row=1)
 		self.exportButton.grid(column=1, row=1)
+
+	def openPlaylistCreateWindow(self):
+		tmpName = simpledialog.askstring(title="Enter Name", prompt="Enter Playlist Name:")
+		self.audioPlayer.createPlaylist(self.playlistTag, tmpName)
+
