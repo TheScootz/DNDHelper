@@ -7,6 +7,7 @@ from PIL import Image, ImageTk
 
 DEFAULT_BACKGROUND = "default.png"
 COLORS = ["red", "cyan", "blue", "purple", "magenta", "orange", "maroon", "green"]
+DRAG_SENSITIVITY = 1
 
 CIRCLE = 0
 RECTANGLE = 1
@@ -36,7 +37,6 @@ class Map(tk.Canvas):
         # Listen for element move and delete events
         self.bind("<B1-Motion>", self.moveElement)
         self.tag_bind("background", "<Button-1>", lambda e: self.setActiveElement(None))
-        self.bind("<Button-3>", lambda e: self.removeElement(self.activeElement))
 
         self.testElements()
 
@@ -67,6 +67,7 @@ class Map(tk.Canvas):
 
         # Listen for drag movement
         self.tag_bind(token.id, "<Button-1>", lambda e: self.setActiveElement(token))
+        self.tag_bind(token.id, "<Button-3>", lambda e: self.removeElement(token))
         
         # Move tokens in front of AOEs
         try:
@@ -91,6 +92,7 @@ class Map(tk.Canvas):
 
         # Listen for drag movement
         self.tag_bind(aoe.id, "<Button-1>", lambda e: self.setActiveElement(aoe))
+        self.tag_bind(aoe.id, "<Button-3>", lambda e: self.removeElement(aoe))
 
         # Move AOEs behind tokens
         try:
@@ -128,8 +130,8 @@ class Map(tk.Canvas):
 
     def dragScroll(self, event):
         # We want to move opposite the mouse direction so we do old - new
-        x_diff = self.lastPos[0] - event.x
-        y_diff = self.lastPos[1] - event.y
+        x_diff = round((self.lastPos[0] - event.x) * DRAG_SENSITIVITY)
+        y_diff = round((self.lastPos[1] - event.y) * DRAG_SENSITIVITY)
 
         self.xview(tk.SCROLL, x_diff, tk.UNITS)
         self.yview(tk.SCROLL, y_diff, tk.UNITS)
