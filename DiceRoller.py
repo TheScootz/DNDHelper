@@ -29,22 +29,22 @@ class DiceRollerWidget(ttk.Frame):
 
         # Set up Dice Roller interface
         self.diceResult = ttk.Label(self.diceRollerContainer)
-        self.diceNum = tk.StringVar()
-        self.diceSides = tk.StringVar()
+        self.diceNum = tk.IntVar(self, 2)
+        self.diceSides = tk.IntVar(self, 6)
         
         self.diceResult.grid(column=0, row=0, columnspan=5, pady=10)
 
         ttk.Label(self.diceRollerContainer, text="Roll").grid(column=0, row=1)
-        ttk.Entry(self.diceRollerContainer, width=2, textvariable=self.diceNum).grid(column=1, row=1)
+        ttk.Entry(self.diceRollerContainer, width=2, justify=tk.CENTER, textvariable=self.diceNum).grid(column=1, row=1)
         ttk.Label(self.diceRollerContainer, text="dice with").grid(column=2, row=1)
-        ttk.Entry(self.diceRollerContainer, width=3, textvariable=self.diceSides).grid(column=3, row=1)
+        ttk.Entry(self.diceRollerContainer, width=3, justify=tk.CENTER, textvariable=self.diceSides).grid(column=3, row=1)
         ttk.Label(self.diceRollerContainer, text="sides").grid(column=4, row=1)
 
         ttk.Button(self.diceRollerContainer, text="Roll", command=self.rollDice).grid(column=0, row=2, columnspan=5, pady=5)
 
     
     def rollDice(self, *args):
-        self.diceRoller = DiceRoller(int(self.diceNum.get()), int(self.diceSides.get()))
+        self.diceRoller = DiceRoller(self.diceNum.get(), self.diceSides.get())
         self.diceRoller.roll()
         self.diceResult.config(text=self.diceRoller.resultString())
         #self.diceResults.insert(0, self.diceRoller.result.copy())

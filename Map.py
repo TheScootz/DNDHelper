@@ -36,19 +36,19 @@ class Map(tk.Canvas):
         self.testTokens()
 
     def testTokens(self):
-        self.addToken(Token(50, 0, (250,350)))
-        self.addToken(Token(30, 0, (67,324)))
+        self.addToken(Token(5, 0, (250,350)))
+        self.addToken(Token(3, 0, (67,324)))
         #self.removeToken(self.tokens[0])
 
-        self.addAOE(AOE(CIRCLE, 20, (300,300)))
-        self.addAOE(AOE(RECTANGLE, (10,20), (500,10)))
+        self.addAOE(AOE(CIRCLE, 6, (300,300)))
+        self.addAOE(AOE(RECTANGLE, (10,10), (500,150)))
 
     def setBackground(self, path):
         self.bgpath = path
         self.background = ImageTk.PhotoImage(file=path)
         # Set the canvas size to the size of the image
         self.config(scrollregion=(0, 0, self.background.width(), self.background.height()))
-        self.create_image(0, 0, image=self.background, anchor='nw')
+        self.create_image(0, 0, image=self.background, anchor='nw', tag="background")
 
     def addToken(self, token):
         if token in self.tokens: return
@@ -83,13 +83,20 @@ class Map(tk.Canvas):
             pos_br = [x+(aoe.size*self.scale) for x in aoe.position]
             aoe.id = self.create_oval(*pos_tl, *pos_br, fill=aoe.color, tag="aoe")
         elif aoe.shape == RECTANGLE:
-            pos_tl = aoe.position
-            pos_br = (aoe.position[0]+(aoe.size[0]*self.scale), aoe.position[1]+(aoe.size[1]*self.scale))
+            pos_tl = (aoe.position[0]-(aoe.size[0]*self.scale)//2, aoe.position[1]-(aoe.size[1]*self.scale)//2)
+            pos_br = (aoe.position[0]+(aoe.size[0]*self.scale)//2, aoe.position[1]+(aoe.size[1]*self.scale)//2)
             aoe.id = self.create_rectangle(*pos_tl, *pos_br, fill=aoe.color, tag="aoe")
         try:
             self.tag_lower(aoe.id, "token")
         # No tokens exist
         except tk.TclError: pass
+
+    def addNextAOE(self, event):
+        pos = self.convertPos((event.x, event.y))
+        self.nextAOE.position = pos
+        self.addAOE(self.nextAOE)
+        self.unbind("<ButtonRelease-1>", self.addAOEBind)
+        self.master.hideMessage()
 
     def removeAOE(self, aoe):
         try:
@@ -123,11 +130,16 @@ class Map(tk.Canvas):
 
         self.lastPos = (event.x, event.y)
 
+    def convertPos(self, pos):
+        x = self.canvasx(pos[0])
+        y = self.canvasy(pos[1])
+        return (x, y)
+
         
 
 class SetScaleDialog(tk.Toplevel):
     def __init__(self, master, mapCanvas, **kwargs):
-        super().__init__(master, kwargs)
+        super().__init__(master, **kwargs)
 
         self.map = mapCanvas
         self.scale = self.map.scale
@@ -194,6 +206,70 @@ class SetScaleDialog(tk.Toplevel):
         self.destroy()
 
 
+class AOEDialog(tk.Toplevel):
+    def __init__(self, master, **kwargs):
+        super().__init__(master, **kwargs)
+        self.shape = tk.IntVar(self, 0)
+
+        self.setup()
+
+        # This section (incl. comments) is taken from the TkDocs tutorial
+        self.protocol("WM_DELETE_WINDOW", self.dismiss) # intercept close button
+        self.transient(master)   # dialog window is related to main
+        self.wait_visibility() # can't grab until window appears, so we wait
+        self.grab_set()        # ensure all input goes to our window
+        self.wait_window()     # block until window is destroyed
+
+    def setup(self):
+        ttk.Label(self, text="Shape: ").grid(column=0, row=0, columnspan=2)
+        ttk.Radiobutton(self, text="Circle", variable=self.shape, value=CIRCLE).grid(column=2, row=0)
+        ttk.Radiobutton(self, text="Rectangle", variable=self.shape, value=RECTANGLE).grid(column=3, row=0)
+
+        self.radius = tk.IntVar(self, 0)
+        self.width = tk.IntVar(self, 0)
+        self.height = tk.IntVar(self, 0)
+        self.circleLabel = ttk.Label(self, text="Radius: ")
+        self.circleEntry = ttk.Entry(self, width=2, justify=tk.CENTER, textvariable=self.radius)
+        self.rectangleLabelW = ttk.Label(self, text="Width: ")
+        self.rectangleEntryW = ttk.Entry(self, width=2, justify=tk.CENTER, textvariable=self.width)
+        self.rectangleLabelH = ttk.Label(self, text="Height: ")
+        self.rectangleEntryH = ttk.Entry(self, width=2, justify=tk.CENTER, textvariable=self.height)
+
+        self.update(None)
+
+        ttk.Button(self, text="Add", command=self.dismiss).grid(column=0, row=2, columnspan=4)
+
+        self.bind("<ButtonRelease-1>", self.update)
+
+    def update(self, event):
+        if self.shape.get() == CIRCLE:
+            self.rectangleLabelW.grid_remove()
+            self.rectangleEntryW.grid_remove()
+            self.rectangleLabelH.grid_remove()
+            self.rectangleEntryH.grid_remove()
+            self.circleLabel.grid(column=0, row=1, columnspan=2)
+            self.circleEntry.grid(column=2, row=1)
+        elif self.shape.get() == RECTANGLE:
+            self.circleLabel.grid_remove()
+            self.circleEntry.grid_remove()
+            self.rectangleLabelW.grid(column=0, row=1)
+            self.rectangleEntryW.grid(column=1, row=1)
+            self.rectangleLabelH.grid(column=2, row=1)
+            self.rectangleEntryH.grid(column=3, row=1)
+
+    # Also from TkDocs
+    def dismiss(self):
+        if self.shape.get() == CIRCLE:
+            size = self.radius.get()
+        elif self.shape.get() == RECTANGLE:
+            size = (self.width.get(), self.height.get())
+        
+        self.master.map.nextAOE = AOE(self.shape.get(), size)
+        self.master.map.addAOEBind = self.master.map.bind("<ButtonRelease-1>", self.master.map.addNextAOE, add="+")
+        self.master.showMessage("Click on the center of your area of effect.")
+        self.grab_release()
+        self.destroy()
+
 
 class MapWidget(ttk.Frame):
     def __init__(self, master, **kwargs):
@@ -213,29 +289,29 @@ class MapWidget(ttk.Frame):
         self.addAOEButton.grid(column=2, row=0, sticky=tk.E)
         ttk.Button(self.mapButtonContainer, text="Set Scale", command=self.setScale).grid(column=3, row=0)
 
+        self.message = ttk.Label(self)
+        self.message.grid(column=0, row=3)
+
     def setBackground(self, *args):
         imagepath = tk.filedialog.askopenfilename(filetypes=["{Image files} {.jpg .png .gif .bmp}"])
         if imagepath != "":
             self.map.setBackground(imagepath)
 
     def promptAOE(self, *args):
-        self.addAOEBind = self.map.bind("<ButtonRelease-1>", self.addAOE, add="+")
-
-    def addAOE(self, event):
-        aoe = AOE(RECTANGLE, (5, 10), self.convertPos((event.x, event.y)))
-        self.map.addAOE(aoe)
-        self.map.unbind("<ButtonRelease-1>", self.addAOEBind)
+        dialog = AOEDialog(self)
 
     def setScale(self, *args):
         dialog = SetScaleDialog(self, self.map)
 
-    def convertPos(self, pos):
-        x = self.map.canvasx(pos[0])
-        y = self.map.canvasy(pos[1])
-        return (x, y)
+    def showMessage(self, message):
+        self.message.config(text=message)
+
+    def hideMessage(self):
+        self.message.config(text="")
+        
 
 class Token:
-    def __init__(self, radius, height, position, color="white", oid=0):
+    def __init__(self, radius, height, position=(0,0), color="white", oid=0):
         self.radius = radius
         self.height = height
         self.position = position
@@ -243,7 +319,7 @@ class Token:
         self.id = oid
 
 class AOE:
-    def __init__(self, shape, size, position, color="white", oid=0):
+    def __init__(self, shape, size, position=(0,0), color="white", oid=0):
         self.shape = shape
         self.size = size
         self.position = position
