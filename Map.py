@@ -6,7 +6,7 @@ import random
 from PIL import Image, ImageTk
 
 DEFAULT_BACKGROUND = "default.png"
-COLORS = ["red", "cyan", "blue", "purple", "magenta", "orange", "maroon", "green"]
+COLORS = ["Aqua", "Aquamarine", "Blue", "BlueViolet", "Brown", "CadetBlue", "Chartreuse", "Chocolate", "Coral", "CornflowerBlue", "Crimson", "Cyan", "DeepPink", "DeepSkyBlue", "DodgerBlue", "FireBrick", "ForestGreen", "Fuchsia", "Gold", "GoldenRod", "Green", "GreenYellow", "HotPink", "LimeGreen", "Magenta", "Maroon", "OliveDrab", "Orange", "OrangeRed", "Orchid", "Peru", "Pink", "Plum", "PowderBlue", "Purple", "Red", "RoyalBlue", "Salmon", "Sienna", "SkyBlue", "SpringGreen", "Teal", "Turquoise", "Violet", "YellowGreen"]
 DRAG_SENSITIVITY = 1
 
 CIRCLE = 0
@@ -41,8 +41,8 @@ class Map(tk.Canvas):
         self.testElements()
 
     def testElements(self):
-        self.addToken(Token(5, 0, (250,350)))
-        self.addToken(Token(3, 0, (67,324)))
+        self.addToken(Token(2, 0, (250,350)))
+        self.addToken(Token(2, 0, (67,324)))
         #self.removeToken(self.tokens[0])
 
         self.addAOE(AOE(CIRCLE, 6, (300,300)))
@@ -63,7 +63,7 @@ class Map(tk.Canvas):
 
         pos_tl = [x-(token.radius*self.scale) for x in token.position]
         pos_br = [x+(token.radius*self.scale) for x in token.position]
-        token.id = sid = self.create_oval(*pos_tl, *pos_br, fill=token.color, width=5, tag="token")
+        token.id = sid = self.create_oval(*pos_tl, *pos_br, fill=token.color, width=3, tag="token")
 
         # Listen for drag movement
         self.tag_bind(token.id, "<Button-1>", lambda e: self.setActiveElement(token))
