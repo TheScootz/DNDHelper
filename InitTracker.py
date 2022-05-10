@@ -7,24 +7,41 @@ class ITrackerWidget(ttk.Frame):
         super().__init__(master, **kwargs)
 
         self.initiativeTrackerWidgetContainer = ttk.Frame(self, width=250, height=200)
-        self.initiativeTrackerWidgetContainer.grid(column=3, row=1, columnspan=5, padx=10, pady=10,sticky=(tk.W+tk.N,tk.N))
+        self.initiativeTrackerWidgetContainer.grid(column=3, row=1, columnspan=6, padx=10, pady=10,sticky=(tk.W+tk.N,tk.N))
 
         self.initiativelist = ITracker(50)
+
+        # ADDING CHARACTERS FOR DEMO
+        self.initiativelist.addCharacter("Father Alaric",9)
+        self.initiativelist.addCharacter("Cecyl",14)
+        self.initiativelist.addCharacter("Matriarch Chessira",5)
+        self.initiativelist.addCharacter("Lady Endette",15)
+        self.initiativelist.addCharacter("Lord Voss",12)
+        self.initiativelist.addCharacter("Clait'Horrox",26)
+        self.initiativelist.addCharacter("Orair",18)
 
         self.initActive = "Inactive"
         self.thisTurn = None#self.initiativelist.initiative
         self.nextTurn = None#self.initiativelist.next
 
         self.startButton = ttk.Button(self.initiativeTrackerWidgetContainer, text="Start Initiative", command=self.makeInit)
-        self.startButton.grid(column=0, row=2, columnspan=5, pady=5)
+        self.startButton.grid(column=0, row=2, columnspan=5, pady=5, sticky=tk.S)
+        #self.addCharButton = ttk.Button(self.initiativeTrackerWidgetContainer, text="Add Character", command=self.makeInit)
+        #self.addCharButton.grid(column=0, row=5, columnspan=5, pady=5, sticky=tk.S+tk.W)
+        #self.remCharButton = ttk.Button(self.initiativeTrackerWidgetContainer, text="Remove Character", command=self.makeInit)
+        #self.remCharButton.grid(column=5, row=5, columnspan=5, pady=5, sticky=tk.S+tk.E)
         self.stepButton = ttk.Button(self.initiativeTrackerWidgetContainer, text="Next Turn", command=self.stepInit)
         self.endButton = ttk.Button(self.initiativeTrackerWidgetContainer, text="End Initiative", command=self.endInit)
 
 
         self.activeLabel = ttk.Label(self.initiativeTrackerWidgetContainer, text="Initiative: "+self.initActive)
-        self.activeLabel.grid(column=3,row=1)
+        self.activeLabel.grid(column=3,row=1,sticky=tk.S+tk.W)
         self.curTurnLabel = None
         self.nextTurnLabel = None
+
+
+    #def addChar(self):
+
 
 
     def makeInit(self):
@@ -34,18 +51,23 @@ class ITrackerWidget(ttk.Frame):
         self.thisTurn = self.initiativelist.initiative
         self.nextTurn = self.initiativelist.next
 
-        self.curTurnLabel = ttk.Label(self.initiativeTrackerWidgetContainer, text="Current Turn: "+str(self.initiativelist.getInit(self.thisTurn)))
-        self.nextTurnLabel = ttk.Label(self.initiativeTrackerWidgetContainer, text="Next Turn: "+str(self.initiativelist.getInit(self.nextTurn)))
-        self.curTurnLabel.grid(column=3,row=2)
-        self.nextTurnLabel.grid(column=3,row=3)
+        self.curTurnLabel = ttk.Label(self.initiativeTrackerWidgetContainer, text="Current Turn - "+str(self.initiativelist.getInit(self.thisTurn)))
+        self.nextTurnLabel = ttk.Label(self.initiativeTrackerWidgetContainer, text="Next Turn - "+str(self.initiativelist.getInit(self.nextTurn)))
+        self.curTurnLabel.grid(column=3,row=2,sticky=tk.W+tk.S)
+        self.nextTurnLabel.grid(column=3,row=3,sticky=tk.W+tk.S)
 
         self.startButton.grid_remove()
-        self.stepButton.grid(column=0, row=0, columnspan=5, pady=5,sticky = tk.W)
-        self.endButton.grid(column=4, row=0, columnspan=5, pady=5, sticky = tk.E)
+        self.stepButton.grid(column=0, row=0, columnspan=5, pady=5,sticky = tk.W+tk.S)
+        self.endButton.grid(column=4, row=0, columnspan=5, pady=5, sticky = tk.E+tk.S)
 
 
     def stepInit(self):
         self.initiativelist.stepInitiative()
+        self.thisTurn = self.initiativelist.initiative
+        self.nextTurn = self.initiativelist.next
+
+        self.curTurnLabel.config(text="Current Turn - "+str(self.initiativelist.getInit(self.thisTurn)))
+        self.nextTurnLabel.config(text="Next Turn - "+str(self.initiativelist.getInit(self.nextTurn)))
 
 
     def endInit(self):

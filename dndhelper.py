@@ -38,11 +38,11 @@ class DNDHelper(ttk.Frame):
         self.diceRollerWidget = DiceRoller.DiceRollerWidget(self)
         self.diceRollerWidget.grid(column=3, row=0, padx=10, pady=10, sticky=tk.N)
 
-        self.characterWidget = Chara.CharacterWidget(self)
-        self.characterWidget.grid(column=3, row=1, padx=10, pady=10, sticky = tk.W+tk.N+tk.N)
+        #self.characterWidget = Chara.CharacterWidget(self)
+        #self.characterWidget.grid(column=3, row=1, padx=10, pady=10, sticky = tk.W+tk.N)
 
         self.initiativeWidget = InitTracker.ITrackerWidget(self)
-        self.initiativeWidget.grid(column=3, row=0, padx=10, pady=10, sticky = tk.W+tk.S)
+        self.initiativeWidget.grid(column=3, row=1, padx=10, pady=10, sticky = tk.W+tk.N)
 
     def createPlaylistWidget(self):
 
