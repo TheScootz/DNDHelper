@@ -224,7 +224,7 @@ class SetScaleDialog(tk.Toplevel):
         self.createGrid(self.scale)
 
         ttk.Label(self, text="Drag so that the grid squares cover 5 square feet").grid(column=0, row=1)
-        ttk.Scale(self, orient=tk.HORIZONTAL, from_=10, to=100, value=self.scale, command=self.createGrid).grid(column=0, row=2, sticky=(tk.W, tk.E))
+        ttk.Scale(self, orient=tk.HORIZONTAL, from_=1, to=100, value=self.scale, command=self.createGrid).grid(column=0, row=2, sticky=(tk.W, tk.E))
         ttk.Button(self, text="OK", command=self.dismiss).grid(column=0, row=3)
 
     # Code comes from https://stackoverflow.com/questions/34006302/how-to-create-a-grid-on-tkinter-in-python

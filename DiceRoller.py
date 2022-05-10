@@ -29,8 +29,8 @@ class DiceRollerWidget(ttk.Frame):
 
         # Set up Dice Roller interface
         self.diceResult = ttk.Label(self.diceRollerContainer)
-        self.diceNum = tk.IntVar(self, 2)
-        self.diceSides = tk.IntVar(self, 6)
+        self.diceNum = tk.IntVar(self, 1)
+        self.diceSides = tk.IntVar(self, 20)
         
         self.diceResult.grid(column=0, row=0, columnspan=5, pady=10)
 
