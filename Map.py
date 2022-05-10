@@ -6,7 +6,7 @@ import random
 from PIL import Image, ImageTk
 
 DEFAULT_BACKGROUND = "default.png"
-COLORS = ["red", "cyan", "blue", "purple", "magenta", "orange", "maroon", "green"]
+COLORS = ["Aqua", "Aquamarine", "Blue", "BlueViolet", "Brown", "CadetBlue", "Chartreuse", "Chocolate", "Coral", "CornflowerBlue", "Crimson", "Cyan", "DeepPink", "DeepSkyBlue", "DodgerBlue", "FireBrick", "ForestGreen", "Fuchsia", "Gold", "GoldenRod", "Green", "GreenYellow", "HotPink", "LimeGreen", "Magenta", "Maroon", "OliveDrab", "Orange", "OrangeRed", "Orchid", "Peru", "Pink", "Plum", "PowderBlue", "Purple", "Red", "RoyalBlue", "Salmon", "Sienna", "SkyBlue", "SpringGreen", "Teal", "Turquoise", "Violet", "YellowGreen"]
 DRAG_SENSITIVITY = 1
 
 CIRCLE = 0
@@ -41,8 +41,8 @@ class Map(tk.Canvas):
         self.testElements()
 
     def testElements(self):
-        self.addToken(Token(5, 0, (250,350)))
-        self.addToken(Token(3, 0, (67,324)))
+        self.addToken(Token(2, 0, (250,350)))
+        self.addToken(Token(2, 0, (67,324)))
         #self.removeToken(self.tokens[0])
 
         self.addAOE(AOE(CIRCLE, 6, (300,300)))
@@ -63,7 +63,7 @@ class Map(tk.Canvas):
 
         pos_tl = [x-(token.radius*self.scale) for x in token.position]
         pos_br = [x+(token.radius*self.scale) for x in token.position]
-        token.id = sid = self.create_oval(*pos_tl, *pos_br, fill=token.color, width=5, tag="token")
+        token.id = sid = self.create_oval(*pos_tl, *pos_br, fill=token.color, width=3, tag="token")
 
         # Listen for drag movement
         self.tag_bind(token.id, "<Button-1>", lambda e: self.setActiveElement(token))
@@ -172,6 +172,12 @@ class Map(tk.Canvas):
 
     def setActiveElement(self, element):
         self.activeElement = element
+        
+    def clear(self):
+        for t in self.tokens:
+            self.delete(t.id)
+        for a in self.aoe:
+            self.delete(a.id)
 
 
         
@@ -320,13 +326,11 @@ class MapWidget(ttk.Frame):
         self.mapButtonContainer = ttk.Frame(self, width=800, height=120, style="BW.TFrame")
         self.mapButtonContainer.grid(column=0, row=2, padx=10, pady=10, sticky=tk.S)
 
-        self.setBackgroundButton = ttk.Button(self.mapButtonContainer, text="Set Background", command=self.setBackground)
-        self.addCharacterButton = ttk.Button(self.mapButtonContainer, text="Add Character", command=self.promptChar)
-        self.addAOEButton = ttk.Button(self.mapButtonContainer, text="Add Area of Effect", command=self.promptAOE)
-        self.setBackgroundButton.grid(column=0, row=0, sticky=tk.W)
-        self.addCharacterButton.grid(column=1, row=0)
-        self.addAOEButton.grid(column=2, row=0, sticky=tk.E)
+        ttk.Button(self.mapButtonContainer, text="Set Background", command=self.setBackground).grid(column=0, row=0, sticky=tk.W)
+        ttk.Button(self.mapButtonContainer, text="Add Character", command=self.promptChar).grid(column=1, row=0)
+        ttk.Button(self.mapButtonContainer, text="Add Area of Effect", command=self.promptAOE).grid(column=2, row=0, sticky=tk.E)
         ttk.Button(self.mapButtonContainer, text="Set Scale", command=self.setScale).grid(column=3, row=0)
+        ttk.Button(self.mapButtonContainer, text="Clear Map", command=self.map.clear).grid(column=4, row=0)
 
         self.message = ttk.Label(self)
         self.message.grid(column=0, row=3)
